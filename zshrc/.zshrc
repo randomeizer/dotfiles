@@ -16,8 +16,30 @@ bindkey '^L' vi-forward-word
 bindkey '^k' up-line-or-search
 bindkey '^j' down-line-or-search
 
+# Where Starship config lives (stow manages ~/.config/starship -> this repo)
+export STARSHIP_CONFIG=${STARSHIP_CONFIG:-"$HOME/.config/starship/starship.toml"}
+
+# Validate gating environment variables (FR-012): must be set to '0' or '1'.
+# If invalid or unset, fail loudly to avoid silent misconfiguration.
+_validate_starship_gating() {
+	local ok=1
+	if [[ "${STARSHIP_NOISY_MODULES+x}" = "" ]] || [[ "$STARSHIP_NOISY_MODULES" != "0" && "$STARSHIP_NOISY_MODULES" != "1" ]]; then
+		echo "[ERROR] STARSHIP_NOISY_MODULES must be set to '0' or '1' (export STARSHIP_NOISY_MODULES=0|1)" >&2
+		ok=0
+	fi
+	if [[ "${STARSHIP_LANG_INDICATORS+x}" = "" ]] || [[ "$STARSHIP_LANG_INDICATORS" != "0" && "$STARSHIP_LANG_INDICATORS" != "1" ]]; then
+		echo "[ERROR] STARSHIP_LANG_INDICATORS must be set to '0' or '1' (export STARSHIP_LANG_INDICATORS=0|1)" >&2
+		ok=0
+	fi
+	return $ok
+}
+
+# Validate before loading Starship
+if ! _validate_starship_gating; then
+	return 1
+fi
+
 eval "$(starship init zsh)"
-export STARSHIP_CONFIG=~/.config/starship/starship.toml
 
 # You may need to manually set your language environment
 export LANG=en_US.UTF-8

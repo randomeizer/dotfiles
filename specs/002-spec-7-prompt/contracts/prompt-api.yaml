@@ -1,0 +1,49 @@
+openapi: 3.0.0
+info:
+  title: Starship Prompt Configuration API
+  version: 1.0.0
+paths:
+  /prompt/context:
+    get:
+      summary: Get current prompt context modules
+      responses:
+        '200':
+          description: List of active context modules
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+  /prompt/theme:
+    get:
+      summary: Get current prompt theme
+      responses:
+        '200':
+          description: Current theme name and settings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  colorScheme:
+                    type: object
+  /prompt/modules:
+    post:
+      summary: Enable or disable prompt modules
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                module:
+                  type: string
+                enabled:
+                  type: boolean
+      responses:
+        '200':
+          description: Module updated

@@ -944,6 +944,16 @@ source ~/.config/nushell/env.nu
 source ~/.zoxide.nu
 source ~/.cache/carapace/init.nu
 source ~/.local/share/atuin/init.nu
+
+# Point Nu to the central Starship config managed by stow
+let starship_conf = ($nu.home-path | path join ".config" "starship" "starship.toml")
+$env.STARSHIP_CONFIG = $starship_conf
+
+# Set sane defaults for gating env vars if they're not set by the user
+if ($env.STARSHIP_NOISY_MODULES == $null) { $env.STARSHIP_NOISY_MODULES = "0" }
+if ($env.STARSHIP_LANG_INDICATORS == $null) { $env.STARSHIP_LANG_INDICATORS = "0" }
+
+# Initialize Starship for nushell (init.nu should exist if starship is installed)
 use ~/.cache/starship/init.nu
 
 let ruby_ver = "3.4.0"

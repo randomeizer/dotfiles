@@ -1,10 +1,24 @@
+
+# Starship prompt config — Spec 7: Fast, cross-shell, right-aligned context
+# See: specs/002-spec-7-prompt/spec.md
+#
+# - Minimal left prompt: working directory + character
+# - Right-aligned context: git, Azure, language indicators (Go, Swift, Java)
+# - Catppuccin theme
+# - Gating for noisy modules and language indicators via env vars
+# - Auto-install/fail gracefully handled by Starship
+
 add_newline = false
 # A minimal left prompt
 format = """$directory$character"""
 palette = "catppuccin_mocha"
-# move the rest of the prompt to the right
-right_format = """$all"""
+# Right-aligned context: git, Azure, language indicators (Go, Swift, Java)
+right_format = "$git_branch$azure$custom.lang_indicators"
 command_timeout = 1000
+
+# Gating variables (must be set in shell config):
+#   STARSHIP_NOISY_MODULES=1   # Enables noisy modules (kubernetes, docker, etc.)
+#   STARSHIP_LANG_INDICATORS=1 # Enables language indicators (Go, Swift, Java)
 
 [character]
 vicmd_symbol = "[N] >>>"
@@ -16,26 +30,45 @@ success_symbol = '[➜](bold green)'
 [git_branch]
 format =  '[$symbol$branch(:$remote_branch)]($style)'
 
-[aws]
-format = '[$symbol(profile: "$profile" )(\(region: $region\) )]($style)'
-disabled = false
+# Azure context (replaces AWS)
+[azure]
+format = '[$symbol($subscription)(tenant: $tenant)]($style)'
 style = 'bold blue'
-symbol = " "
+symbol = " "
+disabled = false
+
+# Language indicators (Go, Swift, Java) — gated by STARSHIP_LANG_INDICATORS
+[custom.lang_indicators]
+when = "env.STARSHIP_LANG_INDICATORS == '1'"
+format = "$golang$swift$java"
+disabled = true
 
 [golang]
 format = '[ ](bold cyan)'
+disabled = false
+
+
+# Kubernetes — gated by STARSHIP_NOISY_MODULES
+[custom.kubernetes]
+when = "env.STARSHIP_NOISY_MODULES == '1'"
+format = "$kubernetes"
+disabled = false
 
 [kubernetes]
 symbol = '☸ '
-disabled = true
-detect_files = ['Dockerfile']
 format = '[$symbol$context( \($namespace\))]($style) '
-contexts = [
-  { context_pattern = "arn:aws:eks:us-west-2:577926974532:cluster/zd-pvc-omer", style = "green", context_alias = "omerxx", symbol = " " },
-]
+disabled = true
 
 [docker_context]
 disabled = true
+
+[swift]
+format = '[ﯣ ](bold magenta)'
+disabled = false
+
+[java]
+format = '[ ](bold yellow)'
+disabled = false
 
 [palettes.catppuccin_mocha]
 rosewater = "#f5e0dc"
