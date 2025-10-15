@@ -23,6 +23,7 @@
 - [X] T002 [P] Update or create `starship/starship.toml` to match spec (right-aligned context, minimal left, Azure, language indicators, gating, Catppuccin theme).
 - [X] T003 [P] Ensure shell config files (`zshrc/`, `bashrc/`, `nushell/`, etc.) initialize Starship and remove Oh-my-zsh for zsh users.
 - [ ] T004 [P] Ensure all config files are compatible with `stow` and symlinked correctly.
+ - [X] T004 [P] Ensure all config files are compatible with `stow` and symlinked correctly.
 
 ## Phase 3.2: Tests First (TDD)
 
