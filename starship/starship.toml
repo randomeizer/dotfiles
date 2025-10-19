@@ -7,24 +7,24 @@ right_format = """$git_branch$git_commit$git_state$git_metrics$git_status$hg_bra
 command_timeout = 1000
 
 [shell]
-zsh_indicator = "z"
-bash_indicator = "b"
-fish_indicator = "f"
-nu_indicator = "n"
-xonsh_indicator = "x"
-cmd_indicator = "c"
-powershell_indicator = "p"
-ion_indicator = "i"
-elvish_indicator = "e"
-tcsh_indicator = "t"
-unknown_indicator = "?"
+zsh_indicator = "🦓"
+bash_indicator = "🐚"
+fish_indicator = "🐟"
+nu_indicator = "🚀"
+xonsh_indicator = "🐍"
+cmd_indicator = "💻"
+powershell_indicator = "💠"
+ion_indicator = "⚛️"
+elvish_indicator = "🧝"
+tcsh_indicator = "🐚"
+unknown_indicator = "❓"
 format = "[$indicator]($style) "
-style = "bold black bg:mauve"
+style = "bold"
 disabled = false
 
 [character]
-vicmd_symbol = "[N] >>>"
-success_symbol = '[➜](bold green)'
+vicmd_symbol = "[N] >>> "
+success_symbol = '[➜](bold green) '
 
 [directory.substitutions]
 '~/tests/starship-custom' = 'work-project'
