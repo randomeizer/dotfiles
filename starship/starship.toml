@@ -1,14 +1,30 @@
 add_newline = false
-# A minimal left prompt
-format = """$directory$character"""
+# Multi-line prompt with shell indicator on second line
+format = """$directory$git_branch$git_commit$git_state$git_metrics$git_status$fill$golang$nodejs$python$rust$java$lua$line_break$shell$character"""
 palette = "catppuccin_mocha"
-# move the rest of the prompt to the right
-right_format = """$git_branch$git_commit$git_state$git_metrics$git_status$hg_branch$docker_context$package$c$cmake$cobol$daml$dart$deno$dotnet$elixir$elm$erlang$golang$haskell$helm$java$julia$kotlin$lua$nim$nodejs$ocaml$perl$php$pulumi$purescript$python$raku$rlang$red$rust$scala$swift$terraform$vlang$vagrant$zig$buf$nix_shell$conda$meson$spack$memory_usage$env_var$crystal$custom$sudo$cmd_duration$line_break$jobs$battery$time$status$container$shell"""
+# clear right format since we're using fill
+right_format = ""
 command_timeout = 1000
 
+[shell]
+zsh_indicator = "🦓"
+bash_indicator = "🐚"
+fish_indicator = "🐟"
+nu_indicator = "🚀"
+xonsh_indicator = "🐍"
+cmd_indicator = "💻"
+powershell_indicator = "💠"
+ion_indicator = "⚛️"
+elvish_indicator = "🧝"
+tcsh_indicator = "🐚"
+unknown_indicator = "❓"
+format = "$indicator "
+style = "bold"
+disabled = false
+
 [character]
-vicmd_symbol = "[N] >>>"
-success_symbol = '[➜](bold green)'
+vicmd_symbol = "[N] >>> "
+success_symbol = '[➜](bold green) '
 
 [directory.substitutions]
 '~/tests/starship-custom' = 'work-project'
@@ -23,7 +39,22 @@ style = 'bold blue'
 symbol = " "
 
 [golang]
-format = '[ ](bold cyan)'
+format = '[$symbol($version )]($style)'
+
+[nodejs]
+format = '[$symbol($version )]($style)'
+
+[python]
+format = '[$symbol($version )]($style)'
+
+[rust]
+format = '[$symbol($version )]($style)'
+
+[java]
+format = '[$symbol($version )]($style)'
+
+[lua]
+format = '[$symbol($version )]($style)'
 
 [kubernetes]
 symbol = '☸ '
@@ -36,6 +67,11 @@ format = '[$symbol$context( \($namespace\))]($style) '
 
 [docker_context]
 disabled = true
+
+[fill]
+symbol = " "
+style = "bold black"
+disabled = false
 
 [ruby]
 disabled = true
