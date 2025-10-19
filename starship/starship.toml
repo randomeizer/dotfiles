@@ -39,7 +39,7 @@ style = 'bold blue'
 symbol = " "
 
 [golang]
-format = '[ ](bold cyan)'
+format = '[$symbol($version )]($style)'
 
 [nodejs]
 format = '[$symbol($version )]($style)'
