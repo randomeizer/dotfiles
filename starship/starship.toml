@@ -1,6 +1,6 @@
 add_newline = false
 # Multi-line prompt with shell indicator on second line
-format = """$directory$git_branch$git_commit$git_state$git_metrics$git_status$fill$golang$nodejs$python$rust$java$line_break$shell$character"""
+format = """$directory$git_branch$git_commit$git_state$git_metrics$git_status$fill$golang$nodejs$python$rust$java$lua$line_break$shell$character"""
 palette = "catppuccin_mocha"
 # clear right format since we're using fill
 right_format = ""
