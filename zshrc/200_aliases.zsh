@@ -47,6 +47,7 @@ alias kgd="kubectl get deployments"
 alias ke="kubectl exec -it"
 alias kcns='kubectl config set-context --current --namespace'
 
+
 # Navigation functions
 cx() { cd "$@" && l; }
 fcd() { cd "$(find . -type d -not -path '*/.*' | fzf)" && l; }
