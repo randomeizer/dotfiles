@@ -19,7 +19,7 @@ elvish_indicator = "e"
 tcsh_indicator = "t"
 unknown_indicator = "?"
 format = "[$indicator]($style) "
-style = "bold cyan"
+style = "bold black bg:mauve"
 disabled = false
 
 [character]
