@@ -1,10 +1,26 @@
 add_newline = false
-# A minimal left prompt
-format = """$directory$character"""
+# A minimal left prompt with shell indicator
+format = """$shell$directory$character"""
 palette = "catppuccin_mocha"
 # move the rest of the prompt to the right
-right_format = """$git_branch$git_commit$git_state$git_metrics$git_status$hg_branch$docker_context$package$c$cmake$cobol$daml$dart$deno$dotnet$elixir$elm$erlang$golang$haskell$helm$java$julia$kotlin$lua$nim$nodejs$ocaml$perl$php$pulumi$purescript$python$raku$rlang$red$rust$scala$swift$terraform$vlang$vagrant$zig$buf$nix_shell$conda$meson$spack$memory_usage$env_var$crystal$custom$sudo$cmd_duration$line_break$jobs$battery$time$status$container$shell"""
+right_format = """$git_branch$git_commit$git_state$git_metrics$git_status$hg_branch$docker_context$package$c$cmake$cobol$daml$dart$deno$dotnet$elixir$elm$erlang$golang$haskell$helm$java$julia$kotlin$lua$nim$nodejs$ocaml$perl$php$pulumi$purescript$python$raku$rlang$red$rust$scala$swift$terraform$vlang$vagrant$zig$buf$nix_shell$conda$meson$spack$memory_usage$env_var$crystal$custom$sudo$cmd_duration$line_break$jobs$battery$time$status$container"""
 command_timeout = 1000
+
+[shell]
+zsh_indicator = "z"
+bash_indicator = "b"
+fish_indicator = "f"
+nu_indicator = "n"
+xonsh_indicator = "x"
+cmd_indicator = "c"
+powershell_indicator = "p"
+ion_indicator = "i"
+elvish_indicator = "e"
+tcsh_indicator = "t"
+unknown_indicator = "?"
+format = "[$indicator]($style) "
+style = "bold cyan"
+disabled = false
 
 [character]
 vicmd_symbol = "[N] >>>"
