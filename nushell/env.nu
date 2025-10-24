@@ -126,7 +126,3 @@ $env.CARAPACE_BRIDGES = 'zsh,fish,bash,inshellisense' # optional
 let _carapace_cache = ($nu.home-path | path join '.cache' 'carapace')
 do { mkdir $_carapace_cache }
 carapace _carapace nushell | save --force ($nu.home-path | path join '.cache' 'carapace' 'init.nu')
-
-# Point Spaceship prompt to the custom configuration file in the user's config directory
-$env.SPACESHIP_CONFIG = ($nu.home-path | path join '.config' 'spaceship' 'spaceship.toml')
-
