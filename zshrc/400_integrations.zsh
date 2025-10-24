@@ -1,5 +1,10 @@
 # External tool integrations
 
+# If using Warp, bail out early to avoid conflicts
+if [[ $TERM_PROGRAM == "WarpTerminal" ]]; then
+    return
+fi
+
 # Starship prompt
 # Select Starship config based on terminal capabilities. Put this in an
 # interactive startup file (zshrc) rather than ~/.zshenv so non-interactive
