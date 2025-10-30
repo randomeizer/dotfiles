@@ -1,14 +1,14 @@
 add_newline = false
-# A minimal left prompt (Terminal.app compatible)
-format = """$directory$character"""
+# A multi-line prompt that mirrors the main starship.toml but is optimized for Terminal.app
+format = """$directory$git_branch$git_commit$git_state$git_metrics$git_status$fill$golang$nodejs$python$rust$java$lua$line_break$shell$character"""
 palette = "catppuccin_mocha"
-# move the rest of the prompt to the right
-right_format = """$git_branch$git_commit$git_state$git_metrics$git_status$hg_branch$docker_context$package$c$cmake$cobol$daml$dart$deno$dotnet$elixir$elm$erlang$golang$haskell$helm$java$julia$kotlin$lua$nim$nodejs$ocaml$perl$php$pulumi$purescript$python$raku$rlang$red$rust$scala$swift$terraform$vlang$vagrant$zig$buf$nix_shell$conda$meson$spack$memory_usage$env_var$crystal$custom$sudo$cmd_duration$line_break$jobs$battery$time$status$container$shell"""
+# right_format is not used in this multi-line configuration
+right_format = ""
 command_timeout = 1000
 
 [character]
 vicmd_symbol = "[N] >>> "
-success_symbol = '[>](bold green) '
+success_symbol = '[➜](bold green) '
 error_symbol = '[✗](bold red) '
 
 [directory.substitutions]
@@ -16,17 +16,16 @@ error_symbol = '[✗](bold red) '
 
 [git_branch]
 format = '[$symbol$branch(:$remote_branch)]($style) '
-symbol = "⎇ "
+symbol = " "
 
 [aws]
 format = '[$symbol(profile: "$profile" )(\\(region: $region\\) )]($style)'
 disabled = true
 style = 'bold blue'
-symbol = "aws "
+symbol = " "
 
 [golang]
-format = '[go ](bold cyan)'
-symbol = "go "
+format = '[$symbol($version )]($style)'
 
 [kubernetes]
 symbol = 'k8s '
@@ -39,6 +38,26 @@ format = '[$symbol$context( \\($namespace\\))]($style) '
 
 [docker_context]
 disabled = true
+
+[fill]
+symbol = " "
+style = "bold black"
+disabled = false
+
+[nodejs]
+format = "[$symbol($version )]($style)"
+
+[python]
+format = '[$symbol($version )]($style)'
+
+[rust]
+format = "[$symbol($version )]($style)"
+
+[java]
+format = "[$symbol($version )]($style)"
+
+[lua]
+format = "[$symbol($version )]($style)"
 
 [ruby]
 disabled = true
@@ -73,3 +92,19 @@ surface0 = "#313244"
 base = "#1e1e2e"
 mantle = "#181825"
 crust = "#11111b"
+
+[shell]
+zsh_indicator = "🦓"
+bash_indicator = "🐚"
+fish_indicator = "🐟"
+nu_indicator = "🚀"
+xonsh_indicator = "🐍"
+cmd_indicator = "💻"
+powershell_indicator = "💠"
+ion_indicator = "⚛️"
+elvish_indicator = "🧝"
+tcsh_indicator = "🐚"
+unknown_indicator = "❓"
+format = "$indicator "
+style = "bold"
+disabled = false
