@@ -25,6 +25,7 @@ disabled = false
 [character]
 vicmd_symbol = "[N] >>> "
 success_symbol = '[➜](bold green) '
+error_symbol = '[✗](bold red) '
 
 [directory.substitutions]
 '~/tests/starship-custom' = 'work-project'
