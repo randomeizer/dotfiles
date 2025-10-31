@@ -29,7 +29,11 @@ bindkey '^j' down-line-or-search
 bindkey jj vi-cmd-mode
 
 # FZF integration
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+# Set up fzf key bindings and fuzzy completion
+# Provides: CTRL-T (files/dirs), CTRL-R (history), ALT-C (cd to dir)
+if command -v fzf >/dev/null 2>&1; then
+    source <(fzf --zsh)
+fi
 
 # Directory-based environment loading (replaces oh-my-zsh autoenv)
 if command -v direnv >/dev/null 2>&1; then
