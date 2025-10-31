@@ -8,15 +8,15 @@ alias ......="cd ../../../../.."
 # Modern tool replacements
 alias cat=bat
 
-# Terminal-aware eza aliases (icons only for capable terminals)
+# Eza aliases (keep ls as native ls to avoid completion conflicts)
 if [[ "$TERM_PROGRAM" == "Apple_Terminal" ]]; then
-  alias ls="eza"
-  alias l="eza -l --git -a"
+  alias l="eza"
+  alias ll="eza -l --git -a"
   alias lt="eza --tree --level=2 --long --git"
   alias ltree="eza --tree --level=2 --git"
 else
-  alias ls="eza --icons"
-  alias l="eza -l --icons --git -a"
+  alias l="eza --icons"
+  alias ll="eza -l --icons --git -a"
   alias lt="eza --tree --level=2 --long --icons --git"
   alias ltree="eza --tree --level=2 --icons --git"
 fi
