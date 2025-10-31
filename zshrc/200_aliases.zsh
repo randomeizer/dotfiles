@@ -21,11 +21,6 @@ else
   alias ltree="eza --tree --level=2 --icons --git"
 fi
 
-# Fix completion for aliased commands
-# When ls is aliased to eza, ensure tab completion still works for files/directories
-# Use _files completion function for direct file/directory completion
-compdef _files ls l lt ltree
-
 # Docker
 alias dco="docker compose"
 alias dps="docker ps"
