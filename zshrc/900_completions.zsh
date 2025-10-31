@@ -4,11 +4,8 @@
 # Fix completion for eza aliases to complete files instead of eza flags
 # eza's completion is auto-loaded by homebrew via site-functions
 if (( $+commands[eza] )); then
-    # Remove eza's completion function if it exists (installed by homebrew)
-    (( $+functions[_eza] )) && unfunction _eza
-    
-    # Clear any existing completions
-    compdef -d l ll lt ltree 2>/dev/null
+    # Clear any existing completions (including homebrew's _eza if loaded)
+    compdef -d l ll lt ltree eza 2>/dev/null
     
     # Simple wrapper that completes files/directories
     _eza_files() {
