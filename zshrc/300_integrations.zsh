@@ -23,10 +23,8 @@ if [[ -f $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; 
 fi
 
 # Key bindings
-bindkey '^L' vi-forward-word
-bindkey '^k' up-line-or-search
-bindkey '^j' down-line-or-search
-bindkey jj vi-cmd-mode
+# Ensure emacs mode (not vi mode)
+bindkey -e
 
 # FZF integration
 # Set up fzf key bindings and fuzzy completion
