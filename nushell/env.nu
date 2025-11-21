@@ -104,22 +104,6 @@ path add /opt/homebrew/opt/ruby/bin:$PATH
 # To load from a custom file you can use:
 # source ($nu.default-config-dir | path join 'custom.nu')
 
-# Ensure starship cache directory exists in a portable way
-let _starship_cache = ($nu.home-path | path join '.cache' 'starship')
-do { mkdir $_starship_cache }
-# Choose starship config based on terminal capabilities (set before init)
-let _starship_config = if ($env.TERM_PROGRAM == 'Apple_Terminal') {
-    ($nu.home-path | path join '.config' 'starship' 'starship-terminal.toml')
-} else {
-    ($nu.home-path | path join '.config' 'starship' 'starship.toml')
-}
-
-$env.STARSHIP_CONFIG = $_starship_config
-
-# Generate and source Nushell init for Starship so the shell actually loads it
-starship init nu | save -f ($nu.home-path | path join '.cache' 'starship' 'init.nu')
-source ($nu.home-path | path join '.cache' 'starship' 'init.nu')
-
 # zoxide init nushell | save -f ~/.zoxide.nu
 $env.NIX_CONF_DIR = '~/.config/nix'
 $env.CARAPACE_BRIDGES = 'zsh,fish,bash,inshellisense' # optional
