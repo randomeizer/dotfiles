@@ -1,3 +1,6 @@
+# Flush DNS cache (macOS)
+alias dns-flush='sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder; echo "DNS cache flushed"'
+
 # Directory navigation
 alias ..="cd .."
 alias ...="cd ../.."

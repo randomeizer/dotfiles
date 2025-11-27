@@ -1,3 +1,10 @@
+# Flush DNS cache (macOS)
+def dns-flush [] {
+    sudo dscacheutil -flushcache
+    sudo killall -HUP mDNSResponder
+    print "DNS cache flushed"
+}
+
 # Nushell Config File
 #
 # version = "0.95.0"
