@@ -14,9 +14,10 @@ eval "$(starship init zsh)"
 source <(kubectl completion zsh) 2>/dev/null
 complete -C '/usr/local/bin/aws_completer' aws 2>/dev/null
 
-# Auto-suggestions (if available)
-if [[ -f $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
-    source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+# Auto-suggestions (if available) — only in interactive shells
+# Avoid running Homebrew commands in non-interactive or sandboxed shells
+if [[ $- == *i* ]] && [[ -x /opt/homebrew/bin/brew ]] && [[ -f $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
+    source "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
     bindkey '^w' autosuggest-execute
     bindkey '^e' autosuggest-accept
     bindkey '^u' autosuggest-toggle

@@ -811,3 +811,4 @@ $env.STARSHIP_CONFIG = $_starship_config
 # Generate and source Nushell init for Starship so the shell actually loads it
 mkdir ($nu.data-dir | path join "vendor/autoload")
 starship init nu | save -f ($nu.data-dir | path join "vendor/autoload/starship.nu")
+source $"($nu.home-path)/.cargo/env.nu"
