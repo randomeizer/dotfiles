@@ -5,6 +5,11 @@ if [[ $TERM_PROGRAM == "WarpTerminal" ]]; then
     return
 fi
 
+# Sync shell-specific setup (symlinks, etc.) outside ~/.config
+if [[ -x "$HOME/.config/scripts/config-sync.sh" ]]; then
+    "$HOME/.config/scripts/config-sync.sh"
+fi
+
 # Starship prompt
 export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
 

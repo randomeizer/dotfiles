@@ -9,6 +9,12 @@ def dns-flush [] {
 #
 # version = "0.95.0"
 
+# Sync shell-specific setup (symlinks, etc.) outside ~/.config
+let sync_helper = ($env.HOME | path join ".config" "scripts" "config-sync.sh")
+if ($sync_helper | path exists) and (not (which bash | is-empty)) {
+    ^bash $sync_helper
+}
+
 $env.config = {
     show_banner: false
 
