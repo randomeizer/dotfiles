@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Ensure ~/.codex/skills symlink points to the repo-managed agents/skills folder
+# Ensure ~/.codex/skills/<subfolder> symlinks point to the repo-managed agents/skills subfolders
 # Only run if codex CLI is installed
 
 if ! command -v codex >/dev/null 2>&1; then
@@ -16,15 +16,34 @@ if [[ ! -d "$SOURCE" ]]; then
   exit 0
 fi
 
-mkdir -p "$HOME/.codex"
+mkdir -p "$TARGET"
 
-if [[ -L "$TARGET" ]]; then
-  dest=$(readlink "$TARGET")
-  [[ "$dest" == "$SOURCE" ]] && exit 0
-  rm "$TARGET"
-elif [[ -e "$TARGET" ]]; then
-  # Respect a user-created directory/file
-  exit 0
-fi
+# Clean up dead symlinks (symlinks pointing to non-existent SOURCE subdirs)
+for link in "$TARGET"/*; do
+  if [[ -L "$link" ]]; then
+    if [[ ! -d "$link" ]]; then
+      # Dead symlink, remove it
+      rm "$link"
+    fi
+  fi
+done
 
-ln -s "$SOURCE" "$TARGET"
+# Create symlinks for each subfolder in SOURCE
+for subfolder in "$SOURCE"/*; do
+  if [[ -d "$subfolder" ]]; then
+    basename=$(basename "$subfolder")
+    target_link="$TARGET/$basename"
+    
+    if [[ -L "$target_link" ]]; then
+      # Already a symlink, verify it points to the right place
+      dest=$(readlink "$target_link")
+      [[ "$dest" == "$subfolder" ]] && continue
+      rm "$target_link"
+    elif [[ -e "$target_link" ]]; then
+      # Something else exists here (file or dir), skip it to preserve existing content
+      continue
+    fi
+    
+    ln -s "$subfolder" "$target_link"
+  fi
+done
