@@ -12,13 +12,13 @@ Work style: telegraph; noun-phrases ok; drop grammar; min tokens.
 - Files: repo or `~/Development/agent`.
 - PRs: use `gh pr view/diff` (no URLs).
 - “Make a note” => edit AGENTS.md (shortcut; not a blocker). Ignore `CLAUDE.md`.
-- No `./runner`. Guardrails: use `trash` for deletes.
+- No `./runner`.
 - Need upstream file: stage in `/tmp/`, then cherry-pick; never overwrite tracked.
 - Bugs: add regression test when it fits.
 - Keep files <~500 LOC; split/refactor as needed.
 - Commits: Conventional Commits (`feat|fix|refactor|build|ci|chore|docs|style|perf|test`).
 - Subagents: read `./subagent.md`.
-- Editor: `code <path>`.
+- Editor: `code-insider <path>`.
 - CI: `gh run list/view` (rerun/fix til green).
 - Prefer end-to-end verify; if blocked, say what’s missing.
 - New deps: quick health check (recent releases/commits, adoption).
@@ -99,10 +99,6 @@ Read `~/Development/agents/agent-scripts/tools.md` for the full tool catalog if 
 ### committer
 
 - Commit helper (PATH). Stages only listed paths; required here. Repo may also ship `./scripts/committer`.
-
-### trash
-
-- Move files to Trash: `trash …` (system command).
 
 ### bin/docs-list / scripts/docs-list.ts
 
