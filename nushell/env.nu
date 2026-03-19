@@ -2,7 +2,7 @@
 #
 # version = "0.95.0"
 
-let home = ($env.HOME? | default $nu.home-path)
+let home = ($env.HOME? | default $nu.home-dir)
 
 def create_left_prompt [] {
     let dir = match (do --ignore-errors { $env.PWD | path relative-to $home }) {
