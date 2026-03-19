@@ -2,6 +2,8 @@
 
 # Setup script for smart shell switching between zsh and nushell
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 echo "Setting up smart shell switching..."
 
 # Check if nushell is installed
@@ -28,6 +30,20 @@ if [ -e "$HOME/.zshrc" ] && [ ! -L "$HOME/.zshrc" ]; then
 else
     ln -sfn "$HOME/.config/zshrc/.zshrc" "$HOME/.zshrc"
 fi
+
+# Bridge the repo-managed nushell config files into the shell-native location.
+NUSHELL_CONFIG_DIR="$HOME/.config/nushell"
+mkdir -p "$NUSHELL_CONFIG_DIR"
+for nu_file in config.nu env.nu; do
+    dest="$NUSHELL_CONFIG_DIR/$nu_file"
+    src="$SCRIPT_DIR/nushell/$nu_file"
+    if [ -e "$dest" ] && [ ! -L "$dest" ]; then
+        echo "⚠️  Skipping existing non-symlink: $dest"
+    else
+        ln -sfn "$src" "$dest"
+        echo "✅ Linked $dest"
+    fi
+done
 
 echo "✅ Setup complete!"
 echo ""
