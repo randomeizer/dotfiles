@@ -1,9 +1,11 @@
 # PowerShell profile to initialize Starship prompt
+$env:STARSHIP_CONFIG = "$HOME/.config/starship/starship.toml"
 Invoke-Expression (&starship init powershell)
+$env:STARSHIP_CONFIG = "$HOME/.config/starship/starship.toml"
 
 # Sync shell-specific setup (symlinks, etc.) outside ~/.config
 $syncHelper = "$HOME/.config/scripts/config-sync.sh"
-if (Test-Path $syncHelper -and (Get-Command bash -ErrorAction SilentlyContinue)) {
+if ((Test-Path $syncHelper) -and (Get-Command bash -ErrorAction SilentlyContinue)) {
 	& bash $syncHelper
 }
 

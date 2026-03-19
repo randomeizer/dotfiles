@@ -811,10 +811,9 @@ alias ke = kubectl exec -it
 
 
 # Choose starship config based on terminal capabilities (set before init)
-let _starship_config = ($nu.home-path | path join '.config' 'starship' 'starship.toml')
+let _starship_config = ($env.HOME | path join '.config' 'starship' 'starship.toml')
 $env.STARSHIP_CONFIG = $_starship_config
 
 # Generate and source Nushell init for Starship so the shell actually loads it
 mkdir ($nu.data-dir | path join "vendor/autoload")
 starship init nu | save -f ($nu.data-dir | path join "vendor/autoload/starship.nu")
-source $"($nu.home-path)/.cargo/env.nu"
