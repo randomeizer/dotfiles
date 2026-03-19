@@ -2,8 +2,10 @@
 #
 # version = "0.95.0"
 
+let home = ($env.HOME? | default $nu.home-path)
+
 def create_left_prompt [] {
-    let dir = match (do --ignore-errors { $env.PWD | path relative-to $env.HOME }) {
+    let dir = match (do --ignore-errors { $env.PWD | path relative-to $home }) {
         null => $env.PWD
         '' => '~'
         $relative_pwd => ([~ $relative_pwd] | path join)
@@ -107,6 +109,6 @@ path add /opt/homebrew/opt/ruby/bin:$PATH
 # zoxide init nushell | save -f ~/.zoxide.nu
 $env.NIX_CONF_DIR = '~/.config/nix'
 $env.CARAPACE_BRIDGES = 'zsh,fish,bash,inshellisense' # optional
-let _carapace_cache = ($env.HOME | path join '.cache' 'carapace')
+let _carapace_cache = ($home | path join '.cache' 'carapace')
 do { mkdir $_carapace_cache }
-carapace _carapace nushell | save --force ($env.HOME | path join '.cache' 'carapace' 'init.nu')
+carapace _carapace nushell | save --force ($home | path join '.cache' 'carapace' 'init.nu')
