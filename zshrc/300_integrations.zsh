@@ -12,7 +12,9 @@ fi
 
 # Starship prompt
 if [[ -o interactive && -o zle ]]; then
-    { eval "$(starship init zsh | sed '/^[[:space:]]*zle -N/d')"; } 2>/dev/null
+    if command -v starship >/dev/null 2>&1; then
+        eval "$(starship init zsh 2>/dev/null | sed '/^[[:space:]]*zle -N/d')"
+    fi
 fi
 export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
 
