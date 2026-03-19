@@ -31,19 +31,13 @@ else
     ln -sfn "$HOME/.config/zshrc/.zshrc" "$HOME/.zshrc"
 fi
 
-# Bridge the repo-managed nushell config files into the shell-native location.
-NUSHELL_CONFIG_DIR="$HOME/.config/nushell"
-mkdir -p "$NUSHELL_CONFIG_DIR"
-for nu_file in config.nu env.nu; do
-    dest="$NUSHELL_CONFIG_DIR/$nu_file"
-    src="$SCRIPT_DIR/nushell/$nu_file"
-    if [ -e "$dest" ] && [ ! -L "$dest" ]; then
-        echo "⚠️  Skipping existing non-symlink: $dest"
-    else
-        ln -sfn "$src" "$dest"
-        echo "✅ Linked $dest"
-    fi
-done
+# Bridge the repo-managed nushell config directory into the shell-native location.
+mkdir -p "$HOME/.config"
+if [ -e "$HOME/.config/nushell" ] && [ ! -L "$HOME/.config/nushell" ]; then
+    echo "⚠️  Skipping existing non-symlink: $HOME/.config/nushell"
+else
+    ln -sfn "$SCRIPT_DIR/nushell" "$HOME/.config/nushell"
+fi
 
 echo "✅ Setup complete!"
 echo ""
