@@ -41,12 +41,12 @@ bindkey '^[f' forward-word      # Alt+f
 # Custom word selection widgets
 select-word-backward() {
   [[ -z $MARK ]] && MARK=$CURSOR
-  backward-word
+  zle backward-word
 }
 
 select-word-forward() {
   [[ -z $MARK ]] && MARK=$CURSOR
-  forward-word
+  zle forward-word
 }
 
 zle -N select-word-backward
