@@ -10,7 +10,8 @@ def dns-flush [] {
 # version = "0.95.0"
 
 # Sync shell-specific setup (symlinks, etc.) outside ~/.config
-let sync_helper = ($env.HOME | path join ".config" "scripts" "config-sync.sh")
+let home = ($env.HOME? | default $nu.home-path)
+let sync_helper = ($home | path join ".config" "scripts" "config-sync.sh")
 if ($sync_helper | path exists) and (not (which bash | is-empty)) {
     ^bash $sync_helper
 }
@@ -811,10 +812,9 @@ alias ke = kubectl exec -it
 
 
 # Choose starship config based on terminal capabilities (set before init)
-let _starship_config = ($nu.home-path | path join '.config' 'starship' 'starship.toml')
+let _starship_config = ($home | path join '.config' 'starship' 'starship.toml')
 $env.STARSHIP_CONFIG = $_starship_config
 
 # Generate and source Nushell init for Starship so the shell actually loads it
 mkdir ($nu.data-dir | path join "vendor/autoload")
 starship init nu | save -f ($nu.data-dir | path join "vendor/autoload/starship.nu")
-source $"($nu.home-path)/.cargo/env.nu"

@@ -11,9 +11,12 @@ if [[ -x "$HOME/.config/scripts/config-sync.sh" ]]; then
 fi
 
 # Starship prompt
+if [[ -o interactive && -o zle ]]; then
+    if command -v starship >/dev/null 2>&1; then
+        eval "$(starship init zsh 2>/dev/null | sed '/^[[:space:]]*zle -N/d')"
+    fi
+fi
 export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
-
-eval "$(starship init zsh)"
 
 # Completions
 source <(kubectl completion zsh) 2>/dev/null
@@ -28,9 +31,30 @@ if [[ $- == *i* ]] && [[ -x /opt/homebrew/bin/brew ]] && [[ -f $(brew --prefix)/
     bindkey '^u' autosuggest-toggle
 fi
 
-# Key bindings
-# Ensure emacs mode (not vi mode)
+# Emacs mode (default)
 bindkey -e
+
+# Word navigation keybindings (Alt+left/right)
+bindkey '^[b' backward-word     # Alt+b
+bindkey '^[f' forward-word      # Alt+f
+
+# Custom word selection widgets
+select-word-backward() {
+  [[ -z $MARK ]] && MARK=$CURSOR
+  zle backward-word
+}
+
+select-word-forward() {
+  [[ -z $MARK ]] && MARK=$CURSOR
+  zle forward-word
+}
+
+zle -N select-word-backward
+zle -N select-word-forward
+
+# Bind Shift+Alt+B and Shift+Alt+F for word selection
+bindkey '^[B' select-word-backward
+bindkey '^[F' select-word-forward
 
 # FZF integration
 # Set up fzf key bindings and fuzzy completion

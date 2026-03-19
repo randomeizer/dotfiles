@@ -1,7 +1,6 @@
-# Modular zsh configuration - auto-source all .zsh files in order
-ZSH_CONFIG_DIR="${0:A:h}"
+# Modular zsh configuration - auto-source all .zsh files in ~/.config/zshrc
+ZSH_CONFIG_DIR="$HOME/.config/zshrc"
 
-for config in "$ZSH_CONFIG_DIR"/*.zsh; do
-  # Skip the main .zshrc file itself
-  [[ "$config" != "$0" ]] && [ -r "$config" ] && source "$config"
+for config in "$ZSH_CONFIG_DIR"/*.zsh(N); do
+  [ -r "$config" ] && source "$config"
 done

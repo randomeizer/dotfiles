@@ -22,11 +22,11 @@ else
     echo "✅ Starship found at $(which starship)"
 fi
 
-# Check if required directories exist
-NUSHELL_CONFIG_DIR="$HOME/.config/nushell"
-if [ ! -d "$NUSHELL_CONFIG_DIR" ]; then
-    echo "📁 Creating nushell config directory..."
-    mkdir -p "$NUSHELL_CONFIG_DIR"
+# Bridge the repo-managed zsh entrypoint into the shell-native location.
+if [ -e "$HOME/.zshrc" ] && [ ! -L "$HOME/.zshrc" ]; then
+    echo "⚠️  Skipping existing non-symlink: $HOME/.zshrc"
+else
+    ln -sfn "$HOME/.config/zshrc/.zshrc" "$HOME/.zshrc"
 fi
 
 echo "✅ Setup complete!"
