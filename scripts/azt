@@ -1,0 +1,27 @@
+#!/usr/bin/env zsh
+
+script_path="$0"
+while [[ -L "$script_path" ]]; do
+  script_dir="$(cd "$(dirname "$script_path")" >/dev/null 2>&1 && pwd)"
+  link_target="$(readlink "$script_path")"
+  if [[ "$link_target" == /* ]]; then
+    script_path="$link_target"
+  else
+    script_path="$script_dir/$link_target"
+  fi
+done
+
+script_dir="$(cd "$(dirname "$script_path")" >/dev/null 2>&1 && pwd)"
+azt_source="$script_dir/../zshrc/500_azure.zsh"
+
+if [[ ! -r "$azt_source" ]]; then
+  azt_source="${XDG_CONFIG_HOME:-$HOME/.config}/zshrc/500_azure.zsh"
+fi
+
+if [[ ! -r "$azt_source" ]]; then
+  printf 'azt: could not find zshrc/500_azure.zsh\n' >&2
+  exit 1
+fi
+
+source "$azt_source"
+azt "$@"

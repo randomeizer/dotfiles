@@ -24,6 +24,7 @@ Work style: telegraph; noun-phrases ok; drop grammar; min tokens.
 - New deps: quick health check (recent releases/commits, adoption).
 - Slash cmds: `~/.codex/prompts/`.
 - Web: search early; quote exact errors; prefer 2024–2025 sources; fallback Firecrawl (`pnpm mcp:*`) / `mcporter`.
+- Azure CLI: when a known tenant alias exists, prefer `azt <alias> ...` over plain `az` so commands use the alias-specific Azure CLI profile.
 - Style: telegraph. Drop filler/grammar. Min tokens (global AGENTS + replies).
 
 ## Screenshots (“use a screenshot”)
