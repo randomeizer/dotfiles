@@ -18,44 +18,48 @@ _azt_profile_dir() {
 
 _azt_usage() {
   cat <<'EOF'
+azt manages Azure tenant aliases and runs az with a per-alias AZURE_CONFIG_DIR.
+Plain az keeps using its default Azure CLI profile.
+
 Usage:
-  azt add <alias> <tenant-id-or-domain>
-  azt remove <alias>
-  azt list
-  azt id <alias>
+  azt --add <alias> <tenant-id-or-domain>
+  azt --add-login <alias> [az login args...]
+  azt --remove <alias>
+  azt --list
+  azt --id <alias>
+  azt --profile <alias>
+  azt --login <alias> [az login args...]
+  azt --current <alias>
+  azt --subscriptions <alias>
+  azt --set <alias> <subscription-id-or-name>
+  azt --help
 
+Azure CLI passthrough:
   azt <alias>                 # show alias profile details
-  azt <alias> login [az login args...]
-  azt <alias> current
-  azt <alias> subscriptions
-  azt <alias> set <subscription-id-or-name>
-  azt <alias> profile
-  azt <alias> <az args...>
+  azt <alias> <az args...>    # run: az <az args...>, using the alias profile
 
-Compatibility forms:
-  azt login <alias> [az login args...]
-  azt current <alias>
-  azt subscriptions <alias>
+Options:
+  --add            create or replace an alias mapped to a tenant ID or domain
+  --add-login      run az login in a new alias profile, then map its active tenant
+  --remove         remove an alias; the alias profile directory is left in place
+  --list           list configured aliases, tenant mappings, and profile paths
+  --id             print the tenant ID or domain mapped to an alias
+  --profile        show an alias's tenant and AZURE_CONFIG_DIR path
+  --login          run az login for the alias's mapped tenant
+  --current        show the active account inside the alias profile
+  --subscriptions  list subscriptions cached inside the alias profile
+  --set            set the active subscription inside the alias profile
+  --help           show this help text
 
 Examples:
-  azt add qps 61c207dc-d4fe-40a3-8341-0f31daa4c62e
-  azt qps login
-  azt qps login --allow-no-subscriptions
-  azt qps set SUB-PRD-VIMS
+  azt --add qps 61c207dc-d4fe-40a3-8341-0f31daa4c62e
+  azt --add-login qps
+  azt --add-login qps --allow-no-subscriptions
+  azt --login qps
+  azt --login qps --allow-no-subscriptions
+  azt --set qps SUB-PRD-VIMS
   azt qps group list
 EOF
-}
-
-_azt_print_aliases() {
-  local file name tenant_id
-  file="$(_azt_tenants_file)"
-
-  [[ -f "$file" ]] || return 0
-
-  while IFS=$'\t' read -r name tenant_id; do
-    [[ -z "$name" || "$name" == \#* ]] && continue
-    printf '%s\n' "$name"
-  done < "$file"
 }
 
 _azt_lookup() {
@@ -86,13 +90,18 @@ _azt_require_alias() {
   fi
 
   printf 'azt: unknown tenant alias: %s\n' "$name" >&2
-  printf 'azt: run "azt list" to see configured aliases\n' >&2
+  printf 'azt: run "azt --list" to see configured aliases\n' >&2
   return 1
 }
 
 _azt_profile() {
   local name="$1"
   local tenant_id profile_dir
+
+  if [[ -z "$name" ]]; then
+    printf 'azt: usage: azt --profile <alias>\n' >&2
+    return 2
+  fi
 
   tenant_id="$(_azt_require_alias "$name")" || return
   profile_dir="$(_azt_profile_dir "$name")"
@@ -114,8 +123,8 @@ _azt_az() {
   shift
 
   if [[ $# -eq 0 ]]; then
-    printf 'azt: usage: azt <alias> <az args...>\n' >&2
-    return 2
+    _azt_profile "$name"
+    return
   fi
 
   tenant_id="$(_azt_require_alias "$name")" || return
@@ -130,25 +139,28 @@ _azt_az() {
   )
 }
 
-_azt_add() {
+_azt_validate_alias_name() {
   local name="$1"
-  local tenant_id="$2"
-  local file dir temp
-
-  if [[ -z "$name" || -z "$tenant_id" ]]; then
-    printf 'azt: usage: azt add <alias> <tenant-id-or-domain>\n' >&2
-    return 2
-  fi
 
   if [[ ! "$name" =~ '^[A-Za-z0-9][A-Za-z0-9._-]*$' ]]; then
     printf 'azt: aliases must start with a letter or number and contain only letters, numbers, dot, underscore, or hyphen\n' >&2
     return 2
   fi
+}
+
+_azt_validate_tenant_id() {
+  local tenant_id="$1"
 
   if [[ ! "$tenant_id" =~ '^[A-Za-z0-9._:-]+$' ]]; then
     printf 'azt: tenant IDs/domains can only contain letters, numbers, dot, underscore, colon, or hyphen\n' >&2
     return 2
   fi
+}
+
+_azt_store_alias() {
+  local name="$1"
+  local tenant_id="$2"
+  local file dir temp
 
   file="$(_azt_tenants_file)"
   dir="$(dirname "$file")"
@@ -168,12 +180,65 @@ _azt_add() {
   printf 'azt: profile: %s\n' "$(_azt_profile_dir "$name")"
 }
 
+_azt_add() {
+  local name="$1"
+  local tenant_id="$2"
+
+  if [[ -z "$name" || -z "$tenant_id" ]]; then
+    printf 'azt: usage: azt --add <alias> <tenant-id-or-domain>\n' >&2
+    return 2
+  fi
+
+  _azt_validate_alias_name "$name" || return
+  _azt_validate_tenant_id "$tenant_id" || return
+  _azt_store_alias "$name" "$tenant_id"
+}
+
+_azt_add_login() {
+  local name="$1"
+  local tenant_id profile_dir
+
+  if [[ -z "$name" ]]; then
+    printf 'azt: usage: azt --add-login <alias> [az login args...]\n' >&2
+    return 2
+  fi
+  shift
+
+  _azt_validate_alias_name "$name" || return
+
+  profile_dir="$(_azt_profile_dir "$name")"
+  mkdir -p "$profile_dir"
+
+  (
+    export AZURE_CONFIG_DIR="$profile_dir"
+    export AZT_ACTIVE_ALIAS="$name"
+    az login "$@"
+  ) || return
+
+  tenant_id="$(AZURE_CONFIG_DIR="$profile_dir" az account show --query tenantId -o tsv 2>/dev/null)"
+  tenant_id="${tenant_id%%$'\n'*}"
+
+  if [[ -z "$tenant_id" ]]; then
+    tenant_id="$(AZURE_CONFIG_DIR="$profile_dir" az account tenant list --query '[0].tenantId' -o tsv 2>/dev/null)"
+    tenant_id="${tenant_id%%$'\n'*}"
+  fi
+
+  if [[ -z "$tenant_id" ]]; then
+    printf 'azt: login succeeded, but no tenant ID could be determined from the alias profile\n' >&2
+    printf 'azt: inspect it with: AZURE_CONFIG_DIR=%s az account show\n' "$profile_dir" >&2
+    return 1
+  fi
+
+  _azt_validate_tenant_id "$tenant_id" || return
+  _azt_store_alias "$name" "$tenant_id"
+}
+
 _azt_remove() {
   local name="$1"
   local file temp
 
   if [[ -z "$name" ]]; then
-    printf 'azt: usage: azt remove <alias>\n' >&2
+    printf 'azt: usage: azt --remove <alias>\n' >&2
     return 2
   fi
 
@@ -192,10 +257,6 @@ _azt_remove() {
   awk -F '\t' -v name="$name" '$1 != name { print }' "$file" > "$temp"
   mv "$temp" "$file"
 
-  if [[ "${AZT_ACTIVE_ALIAS:-}" == "$name" ]]; then
-    unset AZT_ACTIVE_ALIAS AZT_ACTIVE_TENANT_ID
-  fi
-
   printf 'azt: removed %s\n' "$name"
   printf 'azt: profile left in place: %s\n' "$(_azt_profile_dir "$name")"
 }
@@ -207,7 +268,7 @@ _azt_list() {
 
   [[ -f "$file" ]] || {
     printf 'No Azure tenant aliases configured.\n'
-    printf 'Add one with: azt add <alias> <tenant-id-or-domain>\n'
+    printf 'Add one with: azt --add <alias> <tenant-id-or-domain>\n'
     return 0
   }
 
@@ -223,14 +284,35 @@ _azt_list() {
 
   if [[ "$found" != true ]]; then
     printf 'No Azure tenant aliases configured.\n'
-    printf 'Add one with: azt add <alias> <tenant-id-or-domain>\n'
+    printf 'Add one with: azt --add <alias> <tenant-id-or-domain>\n'
   fi
 }
 
 _azt_id() {
+  local name="$1"
   local tenant_id
-  tenant_id="$(_azt_require_alias "$1")" || return
+
+  if [[ -z "$name" ]]; then
+    printf 'azt: usage: azt --id <alias>\n' >&2
+    return 2
+  fi
+
+  tenant_id="$(_azt_require_alias "$name")" || return
   printf '%s\n' "$tenant_id"
+}
+
+_azt_args_contain_tenant_option() {
+  local arg
+
+  for arg in "$@"; do
+    case "$arg" in
+      --tenant|--tenant=*|-t)
+        return 0
+        ;;
+    esac
+  done
+
+  return 1
 }
 
 _azt_login() {
@@ -238,10 +320,16 @@ _azt_login() {
   local tenant_id
 
   if [[ -z "$name" ]]; then
-    printf 'azt: usage: azt <alias> login [az login args...]\n' >&2
+    printf 'azt: usage: azt --login <alias> [az login args...]\n' >&2
     return 2
   fi
   shift
+
+  if _azt_args_contain_tenant_option "$@"; then
+    printf 'azt: --login uses the tenant mapped to the alias; do not pass --tenant or -t\n' >&2
+    printf 'azt: for a raw Azure CLI login command, use: azt %s login ...\n' "$name" >&2
+    return 2
+  fi
 
   tenant_id="$(_azt_require_alias "$name")" || return
   _azt_az "$name" login --tenant "$tenant_id" "$@"
@@ -251,7 +339,7 @@ _azt_current() {
   local name="$1"
 
   if [[ -z "$name" ]]; then
-    printf 'azt: usage: azt <alias> current\n' >&2
+    printf 'azt: usage: azt --current <alias>\n' >&2
     return 2
   fi
 
@@ -262,7 +350,7 @@ _azt_subscriptions() {
   local name="$1"
 
   if [[ -z "$name" ]]; then
-    printf 'azt: usage: azt <alias> subscriptions\n' >&2
+    printf 'azt: usage: azt --subscriptions <alias>\n' >&2
     return 2
   fi
 
@@ -274,7 +362,7 @@ _azt_set_subscription() {
   local subscription="$2"
 
   if [[ -z "$name" || -z "$subscription" ]]; then
-    printf 'azt: usage: azt <alias> set <subscription-id-or-name>\n' >&2
+    printf 'azt: usage: azt --set <alias> <subscription-id-or-name>\n' >&2
     return 2
   fi
 
@@ -282,112 +370,56 @@ _azt_set_subscription() {
   _azt_az "$name" account show --query '{subscription:name, subscriptionId:id, tenantId:tenantId, user:user.name}' -o table
 }
 
-_azt_run_az() {
-  local name="$1"
-
-  if [[ -z "$name" ]]; then
-    printf 'azt: usage: azt <alias> <az args...>\n' >&2
-    return 2
-  fi
-  shift
-
-  if [[ $# -eq 0 ]]; then
-    printf 'azt: usage: azt <alias> <az args...>\n' >&2
-    return 2
-  fi
-
-  _azt_az "$name" "$@"
-}
-
-_azt_for_alias() {
-  local name="$1"
-  local action="${2:-profile}"
-
-  shift
-  [[ $# -gt 0 ]] && shift
-
-  case "$action" in
-    login)
-      _azt_login "$name" "$@"
-      ;;
-    current)
-      _azt_current "$name"
-      ;;
-    subscriptions|subs)
-      _azt_subscriptions "$name"
-      ;;
-    set|subscription)
-      _azt_set_subscription "$name" "$@"
-      ;;
-    profile)
-      _azt_profile "$name"
-      ;;
-    id|tenant)
-      _azt_id "$name"
-      ;;
-    use)
-      printf 'azt: "use" does not change this shell; plain az keeps its default profile.\n' >&2
-      printf 'azt: run "azt %s <az args...>" or "azt %s set <subscription>".\n' "$name" "$name" >&2
-      return 2
-      ;;
-    help|-h|--help)
-      _azt_usage
-      ;;
-    *)
-      _azt_run_az "$name" "$action" "$@"
-      ;;
-  esac
-}
-
 azt() {
-  local command="${1:-help}"
+  local command="${1:-}"
 
-  [[ $# -gt 0 ]] && shift
+  if [[ -z "$command" ]]; then
+    _azt_usage
+    return
+  fi
+  shift
 
   case "$command" in
-    add)
+    --add)
       _azt_add "$@"
       ;;
-    remove|rm|delete|del)
+    --add-login|--login-add)
+      _azt_add_login "$@"
+      ;;
+    --remove|--rm|--delete)
       _azt_remove "$@"
       ;;
-    list|ls)
+    --list|--ls)
       _azt_list
       ;;
-    id|tenant)
+    --id|--tenant)
       _azt_id "$@"
       ;;
-    login)
-      _azt_login "$@"
-      ;;
-    current)
-      _azt_current "$@"
-      ;;
-    subscriptions|subs)
-      _azt_subscriptions "$@"
-      ;;
-    set|subscription)
-      _azt_set_subscription "$@"
-      ;;
-    profile)
+    --profile)
       _azt_profile "$@"
       ;;
-    use)
-      printf 'azt: "use" does not change this shell; plain az keeps its default profile.\n' >&2
-      printf 'azt: run "azt <alias> <az args...>" or "azt <alias> set <subscription>".\n' >&2
-      return 2
+    --login)
+      _azt_login "$@"
       ;;
-    help|-h|--help)
+    --current)
+      _azt_current "$@"
+      ;;
+    --subscriptions|--subs)
+      _azt_subscriptions "$@"
+      ;;
+    --set|--subscription)
+      _azt_set_subscription "$@"
+      ;;
+    --help|-h)
       _azt_usage
       ;;
+    --*)
+      printf 'azt: unknown option: %s\n' "$command" >&2
+      _azt_usage >&2
+      return 2
+      ;;
     *)
-      if _azt_lookup "$command" >/dev/null; then
-        _azt_for_alias "$command" "$@"
-      else
-        printf 'azt: unknown command or tenant alias: %s\n' "$command" >&2
-        _azt_usage >&2
-        return 2
-      fi
+      _azt_az "$command" "$@"
       ;;
   esac
 }
