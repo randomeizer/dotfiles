@@ -17,7 +17,7 @@ _azt_profile_dir() {
 }
 
 _azt_usage() {
-  cat <<'EOF'
+  command cat <<'EOF'
 azt manages Azure tenant aliases and runs az with a per-alias AZURE_CONFIG_DIR.
 Plain az keeps using its default Azure CLI profile.
 

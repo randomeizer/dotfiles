@@ -8,9 +8,6 @@ alias ....="cd ../../.."
 alias .....="cd ../../../.."
 alias ......="cd ../../../../.."
 
-# Modern tool replacements
-alias cat=bat
-
 # Eza aliases (keep ls as native ls to avoid completion conflicts)
 if [[ "$TERM_PROGRAM" == "Apple_Terminal" ]]; then
   alias l="eza"
