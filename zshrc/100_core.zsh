@@ -13,6 +13,9 @@ export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_CACHE_HOME="$HOME/.cache"
 
+# Go installs command binaries here by default when GOBIN is unset.
+export PATH="$HOME/go/bin:$PATH"
+
 # History configuration
 HISTSIZE=10000
 SAVEHIST=10000
@@ -23,4 +26,3 @@ zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 autoload bashcompinit && bashcompinit
 autoload -Uz compinit
 compinit
-

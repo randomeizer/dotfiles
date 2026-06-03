@@ -1,0 +1,4 @@
+interface:
+  display_name: "GWT Create Presenter"
+  short_description: "Create VIMS GWT presenter/view pairs"
+  default_prompt: "Use $gwt-create-presenter to create a new VIMS presenter/view pair using BasePresenter plus View/ViewImpl structure."

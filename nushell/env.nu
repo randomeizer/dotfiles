@@ -101,6 +101,7 @@ use std "path add"
 path add /opt/homebrew/bin
 path add /run/current-system/sw/bin
 path add '~/.local/bin'
+path add ($env.HOME | path join 'go' 'bin')
 path add /opt/homebrew/opt/ruby/bin:$PATH
 
 # To load from a custom file you can use:

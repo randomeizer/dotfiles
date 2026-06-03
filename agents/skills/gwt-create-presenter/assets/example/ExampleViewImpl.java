@@ -4,7 +4,6 @@ import au.gov.qld.des.vims.client.app.bundle.AppResources;
 import au.gov.qld.des.vims.client.support.AbstractContentPanelView;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
-import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.LabelField;
 import javax.inject.Inject;
 
@@ -29,12 +28,17 @@ public class ExampleViewImpl extends AbstractContentPanelView implements Example
   }
 
   @Override
-  public void onPrimaryAction(Runnable handler) {
-    primaryButton.addSelectHandler((SelectEvent event) -> handler.run());
+  public void display() {
+    show();
   }
 
   @Override
-  public void showMessage(String message) {
+  public void onPrimaryAction(Runnable handler) {
+    primaryButton.addSelectHandler(event -> handler.run());
+  }
+
+  @Override
+  public void showStatus(String message) {
     messageLabel.setText(message);
   }
 }

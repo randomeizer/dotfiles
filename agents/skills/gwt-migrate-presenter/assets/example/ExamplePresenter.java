@@ -7,7 +7,7 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 /**
- * Example presenter skeleton.
+ * Example migrated presenter skeleton.
  */
 public class ExamplePresenter extends BasePresenter<ExampleView> {
 
@@ -21,11 +21,17 @@ public class ExamplePresenter extends BasePresenter<ExampleView> {
   }
 
   private void initUI() {
-    view.onPrimaryAction(this::onPrimaryAction);
+    view.onSave(this::save);
+    view.onCancel(this::cancel);
   }
 
-  private void onPrimaryAction() {
-    view.showStatus("Hello from ExamplePresenter");
+  private void save() {
+    String recordName = view.getRecordName();
+    view.showStatus("Saved " + recordName);
+  }
+
+  private void cancel() {
+    view.hide();
   }
 
   @Override
