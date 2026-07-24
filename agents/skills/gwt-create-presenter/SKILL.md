@@ -34,6 +34,22 @@ Treat these as defaults:
   orchestration, validation helpers, loader wiring, or event registration patterns.
 - Create exhaustive presenter unit tests in TestNG as part of the initial implementation.
 
+## Composite Presenters and Child Placement
+
+When creating a presenter that will live inside a parent tab, panel, or wizard:
+- Prefer an instance-owned `UiSlotKey` over exposing the child view to its parent presenter.
+- Have the composite view create its child container and register the slot during construction, then
+  expose only the opaque key. Construct the composite view before creating its children.
+- Pass the target slot into the child presenter's assisted factory, with `UiSlotKey` first among
+  assisted parameters. If placement is immutable, pass it onward to the assisted view factory and
+  mount the completed view at the end of view construction.
+- A Dagger `@AssistedFactory` must return its concrete `@AssistedInject` type. Use a small `@Provides`
+  adapter when the presenter should consume an interface-returning view factory.
+- It is acceptable for a presenter to own a `TreeStore` or `ListStore` as model state and pass it to
+  the view. Keep grids, rendering lifecycle, visual selection, and layout in the implementation.
+- Do not add parent, event manager, context, or generic `UIConfig` arguments by convention. Use only
+  required narrow callbacks and typed feature-specific configuration.
+
 ## Quick Workflow
 
 1. Choose the view host

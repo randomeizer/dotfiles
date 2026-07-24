@@ -39,6 +39,28 @@ Treat these as defaults, not suggestions:
   dependency rather than a richer base presenter or base view.
 - Finish each migration by creating or updating exhaustive presenter unit tests in TestNG.
 
+## Composite Presenters and Child Placement
+
+For a presenter that coordinates tab, panel, or wizard children:
+- Migrate leaf presenters before their parent coordinator.
+- Do not require a parent presenter to obtain child views through `getView()` merely to place them.
+- Let the composite view create its child containers and register instance-owned `UiSlotKey` values
+  during construction. Expose the opaque keys to the parent presenter, not the containers or widgets.
+- Construct the composite view before its child presenters. Pass each target `UiSlotKey` into the
+  child presenter's assisted factory, with the slot key first among assisted parameters.
+- Treat placement as immutable construction context when the child will always occupy one slot.
+  Pass the slot key from the child presenter into its assisted view factory; the completed view may
+  mount itself with `UiManager.requireSlot(slotKey).setWidget(this)` at the end of construction.
+- A Dagger `@AssistedFactory` must return the concrete `@AssistedInject` type. When the presenter
+  should depend on an interface-returning factory, adapt the generated implementation factory with
+  a small `@Provides` method and test that every assisted argument is forwarded in order.
+- Presenter-owned `TreeStore` and `ListStore` instances are acceptable model state. Pass the store
+  into the view for rendering while keeping grids, render readiness, selection visuals, and layout
+  mechanics inside the view implementation.
+- Do not pass a generic parent, `EventManager`, `UIConfig`, or context into a child unless it is used.
+  Prefer narrow callbacks for child-to-parent requests and typed feature configuration for genuine
+  runtime settings.
+
 ## Quick Workflow
 
 1. Identify the migration shape
