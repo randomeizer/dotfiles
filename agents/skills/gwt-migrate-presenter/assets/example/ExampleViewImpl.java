@@ -10,7 +10,7 @@ import javax.inject.Inject;
 /**
  * Example migrated view implementation skeleton.
  */
-public class ExampleViewImpl extends AbstractWindowView implements ExampleView {
+public final class ExampleViewImpl extends AbstractWindowView implements ExampleView {
 
   private final TextField nameField = new TextField();
   private final TextButton saveButton = new TextButton("Save");

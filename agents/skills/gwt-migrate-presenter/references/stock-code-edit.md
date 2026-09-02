@@ -2,10 +2,10 @@
 
 Use these files when the migration involves editor-backed forms, validation display, or a partially migrated presenter/view pair:
 
-- `vims-app/src/main/java/au/gov/qld/des/vims/client/equip/StockCodeEditPresenter.java`
-- `vims-app/src/main/java/au/gov/qld/des/vims/client/equip/StockCodeEditView.java`
-- `vims-app/src/main/java/au/gov/qld/des/vims/client/equip/StockCodeEditViewImpl.java`
-- `vims-app/src/main/java/au/gov/qld/des/vims/client/equip/EquipmentModule.java`
+- `src/main/java/au/gov/qld/des/vims/client/equip/StockCodeEditPresenter.java`
+- `src/main/java/au/gov/qld/des/vims/client/equip/StockCodeEditView.java`
+- `src/main/java/au/gov/qld/des/vims/client/equip/StockCodeEditViewImpl.java`
+- `src/main/java/au/gov/qld/des/vims/client/equip/EquipmentModule.java`
 
 ## Why It Matters
 

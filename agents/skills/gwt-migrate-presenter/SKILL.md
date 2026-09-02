@@ -1,13 +1,15 @@
 ---
 name: gwt-migrate-presenter
-description: Migrate existing VIMS GWT presenter/view pairs to the newer BasePresenter plus View/ViewImpl structure with interface-first views, Dagger module bindings, and required event-manager/provider wiring. Use when Codex needs to convert legacy concrete *View classes into *View interfaces plus *ViewImpl, move presenters away from legacy AbstractPresenter patterns, or tighten presenter/view boundaries so presenters do not depend on GWT or GXT widget internals.
+description: Migrate existing VIMS GWT presenter/view pairs to an interface-first View/ViewImpl design with plain or framework-backed injected presenters, Dagger wiring, and optional event-manager integration. Use when Codex needs to split legacy concrete views, move presenters away from abstract hierarchies, migrate composite presenter trees, or remove GWT/GXT internals from presenters.
 ---
 
 # GWT Presenter/View Migration (VIMS)
 
 Migrate one existing presenter/view pair at a time toward an interface-first, composition-first
 shape like `Login` and `Home`:
-- thin framework host only when it stays non-prescriptive, for example `BasePresenter<YourView>`
+- plain injected final presenter when no framework presenter contract is consumed
+- direct `Presenter` implementation only when callers actually use that contract
+- thin framework host such as `BasePresenter<YourView>` only when it supplies required behaviour
 - public `YourView` interface
 - concrete `YourViewImpl`
 - Dagger module binding for the interface
@@ -31,12 +33,17 @@ Treat these as defaults, not suggestions:
   decide later whether any of it is genuinely reusable.
 - Make the execution order obvious from the concrete presenter and view implementation.
 - Make presenter construction Dagger-first by default. Inject the view through Dagger as well.
+- Keep `AppResources.INSTANCE` out of presenter state, model objects, tree nodes, and static
+  initialization. Inject resources into the view and assign visual resources there.
 - When runtime values such as `parent`, `context`, or `eventManager` are required, use assisted
   injection plus a Dagger factory rather than manual `new`.
 - If a non-Dagger caller still needs to create or access the presenter or presenter factory, add the
   smallest possible `@Deprecated` `AppEnvironment` accessor that forwards to `AppComponent`.
 - If shared behaviour is genuinely reusable, extract it into a helper, utility, service, or other
   dependency rather than a richer base presenter or base view.
+- Follow the repository JSpecify policy while changing APIs. Keep audited client packages explicitly
+  `@NullMarked` in `package-info.java`, annotate every legitimately nullable field, parameter, and
+  return type with JSpecify `@Nullable`, and omit redundant `@NonNull` inside a null-marked scope.
 - Finish each migration by creating or updating exhaustive presenter unit tests in TestNG.
 
 ## Composite Presenters and Child Placement
@@ -60,6 +67,9 @@ For a presenter that coordinates tab, panel, or wizard children:
 - Do not pass a generic parent, `EventManager`, `UIConfig`, or context into a child unless it is used.
   Prefer narrow callbacks for child-to-parent requests and typed feature configuration for genuine
   runtime settings.
+- When a composite parent needs to coordinate or mock a child, prefer a narrow child-presenter
+  contract. If an existing final child has no contract, exercise the real child with a stubbed view
+  rather than weakening production finality for a mocking framework.
 
 ## Quick Workflow
 
@@ -84,6 +94,11 @@ For a presenter that coordinates tab, panel, or wizard children:
 - Do not expose `TextButton`, `Grid`, `ComboBox`, editor drivers, `HandlerRegistration`, or other internal UI types through the view interface.
 - While extracting the API, also identify any sequence or branching currently hidden in base-class
   hooks so it can be made explicit in the concrete implementation.
+- Inspect static helpers and DTO transformations in the old view. Move business transformations to
+  the presenter or a narrow collaborator even when they happen to operate on view-owned records.
+- For GWT-serializable results with concrete collection fields such as `ArrayList`, let consumer APIs
+  accept wildcard collection values, for example `Map<K, ? extends List<V>>`, rather than relying on
+  invalid generic covariance or adding unnecessary copies.
 
 4. Rename the legacy concrete view when needed
 - If a concrete class already uses the final `FooView` name, rename it to `FooViewImpl`.
@@ -91,12 +106,13 @@ For a presenter that coordinates tab, panel, or wizard children:
 - Keep any editor bindings, widget fields, and GWT/GXT wiring inside `FooViewImpl`.
 
 5. Migrate the presenter
-- Prefer `BasePresenter<FooView>` only when it remains a thin framework host and the presenter flow
-  still reads clearly from `FooPresenter`.
+- Prefer a plain final class when no caller consumes `Presenter` and no framework lifecycle is
+  required. Implement `Presenter` directly only when the contract is genuinely consumed. Use
+  `BasePresenter<FooView>` only when it remains a thin framework host with required behaviour.
 - Use `@Inject` or `@AssistedInject` constructor injection and store dependencies as `final` fields.
 - Move UI wiring into `initUI`.
-- Return the interface type from `getView()`.
-- Implement `getContext()` and `getEventManager()` explicitly.
+- Return the interface type from `getView()` only when a caller genuinely needs the view. Do not add
+  `getView()`, `getContext()`, or `getEventManager()` solely to satisfy a convention.
 - Remove presenter dependencies on `SelectEvent`, `NativeEvent`, widget classes, editor drivers, and concrete view internals unless there is no practical abstraction.
 - Pull feature-specific sequence and branching down out of legacy parent classes before deciding
   what, if anything, should be extracted for reuse.
@@ -105,6 +121,9 @@ For a presenter that coordinates tab, panel, or wizard children:
   assisted `Factory` and have Dagger create the presenter through that factory.
 - If the presenter still needs reusable support such as validation flow, loader wiring, masking, or
   report orchestration, prefer an injected or composable collaborator over another shared parent.
+- When a Dispatch mutation returns `Either<ValidationMessages, Success>`, branch on that result in
+  the presenter. Treat validation as an expected business outcome and leave unexpected failures on
+  the standard Dispatch failure path.
 
 6. Migrate the view implementation
 - Keep layout construction, widgets, editor setup, masking hooks, and event translation in `FooViewImpl`.
@@ -113,6 +132,11 @@ For a presenter that coordinates tab, panel, or wizard children:
 - Do not let the view decide business outcomes or own navigation rules.
 - Keep view sequencing visible in `FooViewImpl` rather than hiding it in view inheritance layers,
   except for thin generic framework glue from the host base class.
+- Let the view own mapping and displaying `ValidationMessages`. Return create/edit validation to the
+  modal editor so it remains open; show validation for non-editor mutations, such as removal,
+  through the hosting grid or panel view.
+- When constructing `FormValidator` for a view that is both a GWT `Widget` and `FormView`, pass an
+  explicit field supplier such as `this::getFields` to avoid ambiguous constructor selection.
 
 7. Update module and event wiring
 - Add or update a Dagger module provider that returns the interface type, usually `FooView`, backed by `FooViewImpl`.
@@ -123,16 +147,27 @@ For a presenter that coordinates tab, panel, or wizard children:
 - If a legacy non-Dagger caller must create the presenter, expose only the required presenter or
   factory from `AppComponent`, then add a matching minimal `@Deprecated` `AppEnvironment` accessor.
 - Avoid introducing a new common base class as the default reuse mechanism while doing this wiring.
+- Search for feature events that became obsolete after introducing direct callbacks or Dispatch
+  results. Remove their registrations, event and handler types only after proving no callers remain.
+- If the migration creates a client package, add its explicit `package-info.java` with
+  `@NullMarked`; package annotations do not extend into subpackages. If an existing package is
+  `@NullUnmarked`, do not change that boundary without auditing the whole package.
 
 8. Create or update exhaustive presenter unit tests
-- Create or update `FooPresenterTest` under `vims-app/src/test/java/...` beside the feature package.
+- Create or update `FooPresenterTest` under `src/test/java/...` beside the feature package.
 - Use current VIMS test standards: TestNG, `EasyMockSupport`, `@Test(groups = "unit")`, and `@BeforeMethod` calling `resetAll()`.
 - Mock the migrated view interface and presenter dependencies. Do not couple presenter tests to concrete `FooViewImpl`.
 - Cover constructor and `initUI` wiring, registered view callbacks, event-manager registration, migrated business logic, validation branches, dispatch success and failure paths, and null or edge cases.
+- For typed mutation results, cover both the validation and successful branches, including which
+  view receives the validation messages. Do not add custom-failure tests when unexpected failures
+  use unchanged centralized Dispatch handling.
 - Capture callbacks registered on the view and invoke them directly so the tests prove the presenter reacts correctly through the interface seam.
 - Preserve existing regression coverage and add tests for behaviour that changed during migration, especially places where widget access was replaced by view methods.
+- Mock child-presenter contracts where available. For a final concrete child without a contract, use
+  the real child with a stubbed view instead of making it non-final for the test.
 - Prefer one focused test per behaviour, with helper methods for repeated constructor expectations where that improves readability.
-- Follow `vims-app/src/test/java/au/gov/qld/des/vims/client/auth/LoginPresenterTest.java` and `vims-app/src/test/java/au/gov/qld/des/vims/client/HomePresenterTest.java`.
+- Follow `src/test/java/au/gov/qld/des/vims/client/auth/LoginPresenterTest.java` and
+  `src/test/java/au/gov/qld/des/vims/client/HomePresenterTest.java`.
 
 9. Validate the result
 - Confirm the presenter only depends on interface methods and non-UI services.
@@ -148,7 +183,13 @@ For a presenter that coordinates tab, panel, or wizard children:
 - Confirm any reusable workflow extracted during the migration now lives in a narrowly-scoped
   helper or dependency rather than a richer inherited base.
 - Confirm the presenter test suite covers the migrated behaviour exhaustively using current TestNG patterns.
+- Confirm nullable declarations use `org.jspecify.annotations.Nullable`, and that no redundant
+  `@NonNull` annotations were added inside a `@NullMarked` package or type.
 - Run the focused presenter test class when practical.
+- Run Maven with Java 22 only and `-DforkCount=0` for focused and full tests. Verify Maven's VM with
+  `mvn -version`; standalone `java -version` may resolve to a different installation.
+- After Dagger or assisted-factory changes, run `mvn -DskipTests compile gwt:compile` so Java
+  annotation processing generates `DaggerAppComponent` before the GWT compiler starts.
 - Open the references listed below and compare the migrated structure with the target shape.
 
 ## API Design Rules
@@ -218,8 +259,8 @@ When finishing a migration like `StockCodeEdit*`:
 Open these only as needed:
 - `references/target-patterns.md`
 - `references/stock-code-edit.md`
-- `vims-app/src/test/java/au/gov/qld/des/vims/client/auth/LoginPresenterTest.java`
-- `vims-app/src/test/java/au/gov/qld/des/vims/client/HomePresenterTest.java`
+- `src/test/java/au/gov/qld/des/vims/client/auth/LoginPresenterTest.java`
+- `src/test/java/au/gov/qld/des/vims/client/HomePresenterTest.java`
 
 Use `assets/example/` for a minimal end-state skeleton:
 - `ExamplePresenter.java`

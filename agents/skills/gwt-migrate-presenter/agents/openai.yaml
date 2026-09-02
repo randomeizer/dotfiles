@@ -1,4 +1,4 @@
 interface:
   display_name: "GWT Migrate Presenter"
   short_description: "Migrate VIMS GWT presenter/view pairs"
-  default_prompt: "Use $gwt-migrate-presenter to migrate an existing VIMS presenter/view pair in VIMS to the BasePresenter plus View/ViewImpl structure."
+  default_prompt: "Use $gwt-migrate-presenter to migrate a VIMS presenter/view pair to an interface-first View/ViewImpl design, using a plain injected presenter unless a framework presenter contract is genuinely required."

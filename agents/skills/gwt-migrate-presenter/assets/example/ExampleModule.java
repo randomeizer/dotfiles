@@ -1,13 +1,11 @@
 package au.gov.qld.des.vims.client.example;
 
 import dagger.Module;
-import dagger.Provides;
+import dagger.Binds;
 
 @Module
-public class ExampleModule {
+public interface ExampleModule {
 
-  @Provides
-  public static ExampleView provideExampleView(ExampleViewImpl impl) {
-    return impl;
-  }
+  @Binds
+  ExampleView bindExampleView(ExampleViewImpl implementation);
 }
