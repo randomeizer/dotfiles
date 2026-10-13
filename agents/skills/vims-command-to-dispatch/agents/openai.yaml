@@ -1,4 +1,0 @@
-interface:
-  display_name: "VIMS Command To Dispatch"
-  short_description: "Migrate VIMS Commands sequentially to typed Dispatch Actions."
-  default_prompt: "Use $vims-command-to-dispatch to migrate each requested VIMS legacy Command sequentially, including all UI callers, typed Dispatch handlers, tests, and legacy cleanup."

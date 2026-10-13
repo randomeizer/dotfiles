@@ -1,6 +1,6 @@
 ---
-name: vims-command-to-dispatch
-description: Convert one VIMS legacy Command flow at a time to typed Dispatch Action and ActionHandler code. Use when Codex is asked to migrate a specific VIMS Command, Cmd.process caller, CmdExecutor, CommandListLoadRpcProxy, or RpcPagingCommandProxy usage to the Dispatch/Action pattern in the qps/vims codebase.
+name: vims-migrate-command-to-dispatch
+description: Convert one VIMS legacy Command flow at a time to typed Dispatch Action and ActionHandler code through sequential Luna High work, deterministic checks, and narrow Sol Medium review for evidenced hard risks. Use when Codex is asked to migrate a specific VIMS Command, Cmd.process caller, CmdExecutor, CommandListLoadRpcProxy, or RpcPagingCommandProxy usage to the Dispatch/Action pattern in the qps/vims codebase.
 ---
 
 # VIMS Command To Dispatch
@@ -18,6 +18,15 @@ Exception: `findTasks` is already migrated for the Home screen. Its legacy `CMD_
 ## Discovery
 
 Start from one command name, such as `findOrgUnit` or `saveReferenceType`.
+
+Read [references/legacy-command-wire-contract.md](references/legacy-command-wire-contract.md) first.
+The constant → `Command` → `Cmd.process` → `<commandName>CmdExecutor` → Spring bean → configured
+`Command` path is standard VIMS infrastructure. Confirm it with focused searches and record the
+baseline once; do not rediscover that same wire contract for every command.
+Spend command-specific discovery on callers and entry paths, parameter/result semantics, executor
+behavior, UI effects, tests, and deviations from the baseline. Treat raw-string construction,
+proxy/store/abstract-presenter bypasses, nonstandard registration, shared executor machinery, or
+uncertain dynamic reachability as deviations requiring evidence and possible escalation.
 
 1. Find the command constant in `src/main/java/au/gov/qld/des/vims/common/command/Command.java`.
 2. Find every client caller:
@@ -40,6 +49,56 @@ Start from one command name, such as `findOrgUnit` or `saveReferenceType`.
 Keep a short migration note listing the exact files and UI call sites found. Work only on the current
 command; if the user explicitly requested several, queue the others and start each only after the
 current command's cleanup and focused tests pass.
+
+## Migration workflow
+
+Run each selected command through discovery, behavior ledger, typed design, server implementation,
+client migration, tests, cleanup, and final verification in that order. Do not combine phases or
+start another command until the current one has passed its focused tests and cleanup.
+
+Use `gpt-5.6-luna` at high reasoning effort, or the equivalent Luna High tier, for bounded
+implementation and investigation assignments. Each assignment must have one objective, explicit
+read/write scope, required observations, evidence to return, deterministic checks, and a stopping
+condition. Require a structured report before assigning another step. A worker must not
+self-delegate, broaden scope, or proceed into the next phase.
+
+The coordinator owns the worktree, scope approval, deterministic validation, and final acceptance.
+Validate reports against the current source: confirm required observations, cited paths and line
+ranges, relevant diffs, and required searches/tests. Do not treat a list of commands run as proof.
+If an assignment discovers necessary files outside its read scope, stop and approve or reject the
+scope expansion before further work. Give a mechanical failure one bounded Luna repair.
+
+Any evidence-backed hard risk requires one narrow, read-only Sol Medium review before implementation
+or acceptance. Record security or audit changes, a transaction boundary that may move, composed
+mutations, shared executor machinery, source anomalies, reflection, or uncertain dynamic
+reachability as hard risks when discovered. Send Sol only the relevant risk, cited evidence, the
+smallest relevant file set, and one review question. Require a structured response containing
+`dimension`, `assessment`, `evidence_ids`, `missing_information`, and `proposed_resolution`. If Sol
+requests a repair or blocks the approach, return only that bounded change to Luna; preserve the
+review and verify the resolution deterministically. Routine issues stay with Luna.
+
+Use one coordinator and one active sub-thread at a time. Do not parallelize a command migration. If
+the required model tier or sub-thread is unavailable, perform only deterministic preflight and
+report the limitation before implementation.
+
+## Focused investigation reports
+
+After each bounded assignment, require a concise report with the objective, source revision, claims
+and their evidence, files inspected/changed, commands and tests run, validation results, and
+uncertainties. For semantic claims, the coordinator verifies the cited source and decides whether
+the evidence supports the claim. Return unsupported or uncertain claims to Luna for a narrowly
+scoped evidence repair; do not turn them into a broad review.
+
+## Behavior ledger
+
+Before implementation, write a before-and-after ledger for the selected flow. Each row must cite its
+source location and state how the Dispatch version preserves it. Cover action inputs, successful
+outputs, expected validation, unexpected failures, transaction behavior, mask text, view state,
+events, refreshes, sorting, filtering, paging, selection, and navigation where applicable.
+
+Do not silently fix suspicious legacy behavior during a migration. Record the anomaly and escalate
+the preserve-or-fix decision. Once a higher-tier decision is made, keep the migration and any bug fix
+separate when practical.
 
 ## Action Design
 
@@ -80,6 +139,11 @@ concrete wrapper may be an action-specific nested `Result` while `Success` remai
 named domain result when that payload is shared or meaningful, for example
 `CreateContactPoint.Result` containing either validation messages or `ContactPointSaveResult`.
 
+Treat a failure as expected validation only when the dossier shows that it is user-correctable and
+the current UI presents it as part of the normal interaction. Do not turn authorization failures,
+operational failures, or domain exceptions into validation data merely because the legacy executor
+catches or wraps them.
+
 For no-result commands, use `Action<Nothing>` and a `NothingActionHandler`.
 
 ## Handler Design
@@ -106,6 +170,9 @@ Create a handler under `server/dispatch/<domain>`.
 - Use `ExecutionContext.execute(...)` or `executeRequired(...)` only when composing multiple Actions inside one operation.
 - Do not register handlers manually. `DispatchConfiguration` discovers all `ActionHandler` beans from the Spring context.
 
+If preserving the transaction or exception contract requires interpretation rather than a direct
+port, stop lower-tier implementation and apply the higher-tier routing rules.
+
 Port behavior first; improve structure only when the current migration needs it.
 
 ## Client Migration
@@ -131,6 +198,9 @@ Replace only the selected command's UI call sites.
   after proving no callers remain.
 
 Do not migrate adjacent commands in the same presenter unless they are inseparable from the selected command's UI path.
+Use the behavior ledger and caller graph to decide inseparability. Shared screen location alone is not
+enough; the commands must share one atomic interaction or a result contract that cannot be separated
+without changing behavior.
 
 ## Cleanup
 
@@ -152,6 +222,10 @@ rg -n "CMD_<NAME>|<commandName>|<CommandName>CmdExecutor|new Command\\(|Cmd\\.pr
 
 Never remove `CMD_FIND_TASKS`, `FindTasksCmdExecutor`, or the `CommandProcessorImpl.checkTasks()` bridge during an ordinary command migration.
 
+Zero text references are necessary but not sufficient when reflection, dynamic executor naming,
+shared inheritance, or framework registration may reach the code. Escalate cleanup when any such
+mechanism is present or uncertain.
+
 ## Tests
 
 Add or update tests for the one command being migrated.
@@ -171,7 +245,20 @@ Add or update tests for the one command being migrated.
 - Run `mvn -DskipTests compile gwt:compile` after introducing or changing a nested generic result so
   GWT RPC serialization and linking are verified, not only javac compilation.
 
+Derive a test obligation from every branch, exception conversion, nullable input, custom callback,
+and behavior-ledger row that can change observable behavior. Luna High implements the tests. If an
+earlier review identified a hard risk, include its test obligations in the focused review of test
+adequacy.
+
 If tests cannot be run, report the exact reason and the command that should be run.
+
+## Post-implementation checks
+
+After implementation, run focused tests, cleanup searches, and final verification as separate
+checks. Confirm that inputs, success behavior, validation, unexpected failures, transaction order,
+UI effects, tests, and cleanup all match the behavior ledger and approved design. Remaining
+production references, failed tests, compile errors, GWT serialization failures, and other
+deterministic failures block completion.
 
 ## Completion Check
 
@@ -190,3 +277,9 @@ Before final response for a one-command migration, confirm:
   `@NullUnmarked` until separately audited.
 - Every legitimate nullable value introduced by the migration has an explicit JSpecify
   `@Nullable` annotation; redundant `@NonNull` annotations were not added in null-marked scopes.
+- The migration dossier and behavior ledger agree with the finished diff.
+- No hard escalation signal was handled solely by a lower-tier model.
+- Post-implementation judgments were narrow, evidence-backed, and subordinate to deterministic
+  searches, compilation, and tests.
+- Every evidence-backed hard risk received the required Sol Medium review and was resolved or
+  explicitly reported as blocked.

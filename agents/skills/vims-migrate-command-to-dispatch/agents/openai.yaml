@@ -1,0 +1,4 @@
+interface:
+  display_name: "VIMS Migrate Command To Dispatch"
+  short_description: "Migrate VIMS Commands with deterministic checks and risk review."
+  default_prompt: "Use $vims-migrate-command-to-dispatch to migrate one requested VIMS legacy Command through sequential Luna High work and coordinator-owned deterministic checks. Give each focused worker one bounded objective and require an evidence-linked report before assigning more work; return unsupported claims to Luna for targeted investigation, and use narrow Sol Medium review for evidenced hard risks. Treat the documented Command-to-CmdExecutor Spring wire contract as known infrastructure; verify it once and focus discovery on command-specific behavior and deviations."
