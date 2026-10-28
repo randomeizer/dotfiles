@@ -8,6 +8,7 @@ import pty
 from pathlib import Path
 import select
 import shutil
+import struct
 import subprocess
 import tempfile
 import termios
@@ -159,6 +160,7 @@ class NushellStartupTests(unittest.TestCase):
 
     def run_repl(self):
         master, slave = pty.openpty()
+        fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack("HHHH", 24, 80, 0, 0))
         def attach_tty():
             os.setsid()
             fcntl.ioctl(0, termios.TIOCSCTTY, 0)
@@ -171,6 +173,7 @@ class NushellStartupTests(unittest.TestCase):
         try:
             deadline = time.monotonic() + 10
             sent = False
+            cursor_queries = 0
             while time.monotonic() < deadline:
                 ready, _, _ = select.select([master], [], [], 0.2)
                 if ready:
@@ -181,6 +184,12 @@ class NushellStartupTests(unittest.TestCase):
                     if not chunk:
                         break
                     output += chunk
+                    # Reedline asks the terminal for its cursor position. A PTY
+                    # has no terminal emulator, so supply a valid response.
+                    new_queries = output.count(b"\x1b[6n")
+                    for _ in range(new_queries - cursor_queries):
+                        os.write(master, b"\x1b[1;1R")
+                    cursor_queries = new_queries
                 if not sent and b'> ' in output:
                     os.write(master, b'print $"DOTFILES_MARKER=($env.DOTFILES_TEST_STARSHIP? | default missing)"\n')
                     sent = True

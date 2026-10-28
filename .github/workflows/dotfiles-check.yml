@@ -1,0 +1,20 @@
+name: Dotfiles checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install check dependencies
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: '1'
+        run: brew install stow nushell powershell lua
+      - name: Run checks
+        run: bash scripts/check.sh --require-tests
