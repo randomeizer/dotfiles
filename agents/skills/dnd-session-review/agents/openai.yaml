@@ -1,0 +1,4 @@
+interface:
+  display_name: "DnD Session Review"
+  short_description: "Orchestrate sub-skills and run final session validation"
+  default_prompt: "Use $dnd-session-review to check templates and my player character, run $dnd-session-setup if needed, then complete the session review and final validation."

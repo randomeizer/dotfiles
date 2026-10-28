@@ -1,0 +1,4 @@
+interface:
+  display_name: "DnD Session Triage"
+  short_description: "Interactively resolve ambiguous entities"
+  default_prompt: "Use $dnd-session-triage to resolve queued entity ambiguity before output generation."

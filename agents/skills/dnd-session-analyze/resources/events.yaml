@@ -1,0 +1,47 @@
+---
+schema_version: 2
+session:
+  session_number: 53
+  date: "2026-02-08"
+  source_note: "Sessions/Notes/2026-02-08 - Session 53.md"
+  scope_used: "now"
+context:
+  previous_summaries:
+    - "Sessions/Summaries/2026-01-14 - Session 50 - Summary.md"
+    - "Sessions/Summaries/2026-01-28 - Session 51 - Summary.md"
+    - "Sessions/Summaries/2026-02-04 - Session 52 - Summary.md"
+events:
+  - id: "ev-053-001"
+    title: "Party reaches Neverwinter"
+    description: "The party arrives in Neverwinter and is escorted toward the castle."
+    confidence: 0.86
+    start_index: "42:1"
+    end_index: "58:24"
+    participants:
+      - "Valen Souvaar"
+      - "Saffron"
+      - "Yeni"
+      - "Tonnik Greywater"
+    locations:
+      - "Neverwinter"
+      - "Protectors Enclave"
+    factions:
+      - "Lords Alliance"
+    items: []
+    consequences:
+      - "The party is brought into a formal audience context."
+    quest_hooks:
+      - "Investigate why guard presence around the castle is unusually high."
+    source_excerpt: "Led to the entrance of the castle. Sees flags of the Lords Alliance."
+quest_candidates:
+  - key: "investigate-castle-security-shift"
+    title: "Investigate Castle Security Shift"
+    description: "Determine why security has intensified and who ordered it."
+    confidence: 0.77
+    status: "proposed"
+    source_event_ids:
+      - "ev-053-001"
+    keywords:
+      - "neverwinter"
+      - "lords-alliance"
+      - "guards"

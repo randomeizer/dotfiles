@@ -1,0 +1,4 @@
+interface:
+  display_name: "DnD Session Analyze"
+  short_description: "Author events.yaml + world.yaml with strict linting and interactive triage"
+  default_prompt: "Use $dnd-session-analyze to read a session note in two passes, generate events.yaml then world.yaml, lint both, and resolve triage interactively."

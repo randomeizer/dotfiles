@@ -1,0 +1,4 @@
+interface:
+  display_name: "DnD Session Quests"
+  short_description: "Generate then review quest threads from session artifacts"
+  default_prompt: "Use $dnd-session-quests to generate quest files from events.yaml/world.yaml + summary + notes, then do a model-driven review pass to add/remove/tweak outputs."

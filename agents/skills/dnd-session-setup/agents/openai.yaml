@@ -1,0 +1,4 @@
+interface:
+  display_name: "DnD Session Setup"
+  short_description: "Prepare missing campaign templates interactively"
+  default_prompt: "Use $dnd-session-setup to check this vault and create missing templates using my campaign preferences."

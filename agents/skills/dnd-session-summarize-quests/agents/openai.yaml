@@ -1,0 +1,4 @@
+interface:
+  display_name: "DnD Session Summaries+Quests"
+  short_description: "Write linked summaries and quest updates"
+  default_prompt: "Use $dnd-session-summarize-quests to generate the session summary and update persistent quest threads."

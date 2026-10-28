@@ -1,0 +1,4 @@
+interface:
+  display_name: "DnD Session Summarise"
+  short_description: "Write a summary from Stage 1 metadata + note spans"
+  default_prompt: "Use $dnd-session-summarise to generate only the session summary from existing events.yaml/world.yaml and the session note."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "DnD Session World Update"
+  short_description: "Upsert world lore from session analysis"
+  default_prompt: "Use $dnd-session-world-update to update world entity files from the current session analysis."

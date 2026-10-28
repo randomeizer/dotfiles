@@ -1,0 +1,47 @@
+---
+schema_version: 2
+session:
+  session_number: 53
+  date: "2026-02-08"
+  source_note: "Sessions/Notes/2026-02-08 - Session 53.md"
+  scope_used: "now"
+context:
+  previous_summaries:
+    - "Sessions/Summaries/2026-01-14 - Session 50 - Summary.md"
+    - "Sessions/Summaries/2026-01-28 - Session 51 - Summary.md"
+    - "Sessions/Summaries/2026-02-04 - Session 52 - Summary.md"
+  based_on_events_file: ".dnd-meta/sessions/2026-02-08-s053/events.yaml"
+entities:
+  - mention: "Lords Alliance"
+    canonical_title: "Lords Alliance"
+    entity_type: "faction"
+    resolution_status: "resolved"
+    blocking: false
+    confidence: 0.94
+    aliases:
+      - "Lords' Alliance"
+    event_ids:
+      - "ev-053-001"
+    evidence_spans:
+      - start_index: "55:6"
+        end_index: "55:35"
+        excerpt: "Sees flags of the Lords Alliance."
+    triage_reason: ""
+  - mention: "Mayor Galt"
+    canonical_title: "Mayor Soman Galt"
+    entity_type: "character"
+    resolution_status: "triage_required"
+    blocking: true
+    confidence: 0.54
+    aliases: []
+    event_ids:
+      - "ev-053-001"
+    evidence_spans:
+      - start_index: "59:1"
+        end_index: "61:20"
+        excerpt: "Reference to Mayor Galt is ambiguous in this scene."
+    triage_reason: "Name match could point to an existing mayor or a new NPC."
+triage_summary:
+  open_count: 1
+  blocking_count: 1
+  resolved_count: 1
