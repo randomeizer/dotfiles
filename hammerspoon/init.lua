@@ -18,12 +18,6 @@ hs.hotkey.bind({"alt"}, "R", function()
 end)
 hs.alert.show("Config loaded")
 
-local calendar = hs.loadSpoon("GoMaCal")
-if calendar then
-    calendar:setCalendarPath('/Users/omerxx/dotfiles/hammerspoon/calendar-app/calapp')
-    calendar:start()
-end
-
 
 
 
@@ -76,8 +70,3 @@ end
 -- hs.hotkey.bind({"cmd", "alt"}, "m", start_quicktime_movie)
 -- hs.hotkey.bind({"cmd", "alt"}, "s", start_quicktime_screen)
 --
--- local calendar = hs.loadSpoon("GoMaCal")
--- if calendar then
---     calendar:setCalendarPath('/Users/omerxx/dotfiles/hammerspoon/calendar-app/calapp')
---     calendar:start()
--- end
