@@ -4,6 +4,8 @@ raycast
 fzf
 history.txt
 .github/**/*
+!.github/workflows/
+!.github/workflows/dotfiles-check.yml
 .specify/**/*
 .warp/
 

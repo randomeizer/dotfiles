@@ -138,18 +138,24 @@ tree is installed. It shares the same options and preservation rules through
 `setup.sh --shells-only`; Nushell and Starship need not be installed just to make
 the link. Application dependencies must still be installed before using configs.
 
-## Validate installation changes
+## Validate changes
 
-With GNU Stow and Python 3 available:
+Run the repository checks before committing:
 
 ```bash
-PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_*.py'
-bash -n setup.sh setup-shells.sh
+bash scripts/check.sh
 ```
 
-Installer tests use a temporary checkout and home; they do not install into your
-live configuration or launch applications. This install change does not modify
-the other recommendations from the setup review.
+The command requires Git, Bash, Zsh, GNU Stow, Nushell, PowerShell, and Lua
+(`luac`). It checks tracked and unignored new shell, Lua, JSON and TOML files.
+The existing behavioral tests also run when Python 3 is available; otherwise the
+command reports that they were skipped. Pass `--require-tests` to fail if Python
+is missing. GitHub Actions uses that option until the tests are migrated away
+from Python ([issue #23](https://github.com/randomeizer/dotfiles/issues/23)).
+Other missing tools and failed checks return a nonzero status.
+
+These checks do not install into your live home or contact cloud services. They
+do not replace a clean-account installation or a live desktop application check.
 
 ## Config sync
 
