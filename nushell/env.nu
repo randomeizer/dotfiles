@@ -4,6 +4,43 @@
 
 let home = ($env.HOME? | default $nu.home-dir)
 
+# Refresh generated integrations only when the executable or its path changes.
+# An unknown existing file is left alone; previous generated files are migrated.
+def dotfiles-refresh-nu-init [tool: string, target: path] {
+    let found = (which $tool | where type == 'external')
+    if ($found | is-empty) { return }
+    let executable = ($found | first | get path)
+    let header = $"# dotfiles executable: ($executable)\n"
+    # Inspect the entry itself: a dangling user symlink does not pass path exists.
+    let kind = (try { ls -l $target | get 0.type } catch { null })
+    if $kind != null and $kind != 'file' { return }
+    let exists = ($kind == 'file')
+    let previous = if $exists { try { open --raw $target } catch { return } } else { '' }
+    let owned = (($previous | str starts-with '# dotfiles executable: ') or
+        (($tool == 'starship') and ($previous | str starts-with '# this file is both a valid')) or
+        (($tool == 'carapace') and ($previous | str contains 'let carapace_completer') and ($previous | str contains 'CARAPACE_SHELL')))
+    if $exists and (not $owned) { return }
+    let stale = if $exists {
+        try { (ls -l $executable | get 0.modified) > (ls -l $target | get 0.modified) } catch { true }
+    } else { true }
+    if $exists and ($previous | str starts-with $header) and (not $stale) { return }
+    let generated = if $tool == 'starship' {
+        do -i { ^$executable init nu } | complete
+    } else {
+        do -i { ^$executable _carapace nushell } | complete
+    }
+    if $generated.exit_code != 0 or ($generated.stdout | is-empty) { return }
+    let parent = ($target | path dirname)
+    let temporary = ($parent | path join $".($tool)-(random uuid).tmp")
+    try {
+        mkdir $parent
+        $"($header)($generated.stdout)" | save --force $temporary
+        mv --force $temporary $target
+    } catch {
+        if ($temporary | path exists) { rm --force $temporary }
+    }
+}
+
 def create_left_prompt [] {
     let dir = match (do --ignore-errors { $env.PWD | path relative-to $home }) {
         null => $env.PWD
@@ -111,5 +148,6 @@ if ('/opt/homebrew/opt/ruby/bin' | path exists) {
 # zoxide init nushell | save -f ~/.zoxide.nu
 $env.CARAPACE_BRIDGES = 'zsh,fish,bash,inshellisense' # optional
 let _carapace_cache = ($home | path join '.cache' 'carapace')
-do { mkdir $_carapace_cache }
-carapace _carapace nushell | save --force ($home | path join '.cache' 'carapace' 'init.nu')
+if $nu.is-interactive {
+    dotfiles-refresh-nu-init 'carapace' ($_carapace_cache | path join 'init.nu')
+}
