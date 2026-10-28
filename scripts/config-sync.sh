@@ -5,12 +5,17 @@ set -euo pipefail
 # Runs all executable scripts in the config-sync.d directory
 # Call from zsh, nushell, powershell profiles to keep configs in sync
 #
-# Usage: config-sync.sh [--debug]
+# Usage: config-sync.sh [--debug] [--strict]
 
 DEBUG=false
-if [[ "${1:-}" == "--debug" ]]; then
-  DEBUG=true
-fi
+STRICT=false
+for arg in "$@"; do
+  case "$arg" in
+    --debug) DEBUG=true ;;
+    --strict) STRICT=true ;;
+    *) printf 'config-sync: unknown option: %s\n' "$arg" >&2; exit 2 ;;
+  esac
+done
 
 debug_msg() {
   if [[ "$DEBUG" == true ]]; then
@@ -28,12 +33,23 @@ if [[ ! -d "$SYNC_DIR" ]]; then
   exit 0
 fi
 
-# Run all executable scripts in config-sync.d in lexicographic order
+# Run all tasks even if one fails; shell startup remains usable.
+failed_tasks=()
 for script in "$SYNC_DIR"/*; do
   if [[ -f "$script" ]] && [[ -x "$script" ]]; then
     debug_msg "Running $(basename "$script")"
-    "$script" "$@" || true  # Continue on error to avoid breaking shell startup
+    if "$script" "$@"; then
+      :
+    else
+      task_status=$?
+      failed_tasks+=("$(basename "$script") (exit $task_status)")
+    fi
   fi
 done
 
-debug_msg "Config sync completed"
+if (( ${#failed_tasks[@]} )); then
+  printf 'config-sync: failed tasks: %s\n' "${failed_tasks[*]}" >&2
+  [[ "$STRICT" == false ]] || exit 1
+else
+  debug_msg "Config sync completed"
+fi

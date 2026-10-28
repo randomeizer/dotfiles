@@ -16,9 +16,11 @@ if [[ -L "$TARGET" ]]; then
   if [[ "$current_target" == "$SOURCE" ]]; then
     exit 0
   fi
-  rm "$TARGET"
+  printf 'config-sync: preserved conflicting path: %s\n' "$TARGET" >&2
+  exit 1
 elif [[ -e "$TARGET" ]]; then
-  exit 0
+  printf 'config-sync: preserved conflicting path: %s\n' "$TARGET" >&2
+  exit 1
 fi
 
 ln -s "$SOURCE" "$TARGET"

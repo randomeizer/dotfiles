@@ -64,3 +64,20 @@ bash -n setup.sh setup-shells.sh
 Installer tests use a temporary checkout and home; they do not install into your
 live configuration or launch applications. This install change does not modify
 the other recommendations from the setup review.
+
+## Config sync
+
+Shell startup runs `~/.config/scripts/config-sync.sh` to link shared skills and
+the `azt` command. Links are removed only when they point to the expected managed
+skill path and that path has disappeared. Existing files and unrelated links are
+preserved; collisions and failed tasks are reported without interrupting shell
+startup. The sync continues through all tasks after an error.
+
+To synchronize and check for collisions or other failures explicitly, run:
+
+```bash
+~/.config/scripts/config-sync.sh --strict
+```
+
+Strict mode returns a nonzero status if any task fails. Add `--debug` to show
+which tasks are run. Strict mode still performs synchronization.

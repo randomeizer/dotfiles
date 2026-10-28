@@ -1,20 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Expose the repo-managed skills through the shared agent discovery directory.
-SOURCE="$HOME/.config/agents/skills"
-TARGET="$HOME/.agents/skills"
-[[ -d "$SOURCE" ]] || exit 0
-mkdir -p "$TARGET"
-
-for subfolder in "$SOURCE"/*; do
-  [[ -d "$subfolder" ]] || continue
-  target_link="$TARGET/$(basename "$subfolder")"
-  if [[ -L "$target_link" ]]; then
-    [[ "$(readlink "$target_link")" == "$subfolder" ]] && continue
-    rm "$target_link"
-  elif [[ -e "$target_link" ]]; then
-    continue
-  fi
-  ln -s "$subfolder" "$target_link"
+script_path="${BASH_SOURCE[0]}"
+while [[ -L "$script_path" ]]; do
+  link_dir="$(cd "$(dirname "$script_path")" && pwd -P)"
+  link_target="$(readlink "$script_path")"
+  if [[ "$link_target" == /* ]]; then script_path="$link_target"
+  else script_path="$link_dir/$link_target"; fi
 done
+script_dir="$(cd "$(dirname "$script_path")" && pwd -P)"
+source "$script_dir/../lib/skill-sync.sh"
+sync_skill_links "$HOME/.config/agents/skills" "$HOME/.agents/skills"
