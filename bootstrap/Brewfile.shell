@@ -1,0 +1,12 @@
+# Optional shell and terminal tools referenced by the dotfiles.
+brew "nushell"
+brew "starship"
+brew "carapace"
+brew "eza"
+brew "fzf"
+brew "zoxide"
+brew "atuin"
+brew "direnv"
+brew "tmux"
+cask "font-jetbrains-mono"
+cask "font-jetbrains-mono-nerd-font"

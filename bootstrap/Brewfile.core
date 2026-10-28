@@ -1,0 +1,2 @@
+# Core dependency for deploying the managed configuration.
+brew "stow"
