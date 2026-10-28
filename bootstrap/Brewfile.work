@@ -1,0 +1,4 @@
+# Optional development and cloud CLI integrations.
+brew "kubernetes-cli"
+brew "azure-cli"
+brew "gh"

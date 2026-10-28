@@ -1,0 +1,5 @@
+# Optional macOS desktop integrations.
+tap "FelixKratz/formulae"
+brew "sketchybar"
+cask "nikitabobko/tap/aerospace"
+cask "hammerspoon"

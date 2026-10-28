@@ -1,5 +1,91 @@
 # Dotfiles
 
+## Rebuild a Mac
+
+This setup targets macOS, primarily Apple Silicon. On a new machine, install the
+Apple command line tools if Git is unavailable, then install [Homebrew](https://brew.sh/)
+and add it to your shell's PATH using its installation instructions. Clone this
+repository and run the read-only check from the checkout:
+
+```bash
+git clone https://github.com/randomeizer/dotfiles.git
+cd dotfiles
+./bootstrap.sh check
+```
+
+The check reports GNU Stow, optional tools and standard desktop-app locations,
+then previews configuration conflicts without changing your home or target.
+It also inspects current-user sync collisions without performing sync; skill
+checks are deferred if the shared source has not yet been installed. Missing
+Stow, a config conflict, or a sync collision makes it return nonzero. Select any
+groups you intend to use to treat their missing commands/apps as failures:
+
+```bash
+./bootstrap.sh check --group shell --group desktop
+```
+
+Once Homebrew is available, install GNU Stow and any selected groups, deploy the
+config, and run strict sync for the current user:
+
+```bash
+./bootstrap.sh install --install-packages --group shell --group desktop
+```
+
+Package installation is explicit: without `--install-packages`, `install` only
+deploys the config and runs sync. The groups are independent and repeatable:
+
+| Group | Packages |
+| --- | --- |
+| Core | GNU Stow; installed whenever `--install-packages` is used. |
+| `shell` | Nushell, Starship, Carapace, eza, fzf, zoxide, Atuin, direnv, tmux, and JetBrains Mono fonts. |
+| `desktop` | AeroSpace, SketchyBar and Hammerspoon on macOS. |
+| `work` | kubectl, Azure CLI and GitHub CLI. |
+
+The manifests are in `bootstrap/Brewfile.*`. Homebrew is invoked with
+`--no-upgrade`; it may still need to update a dependency during installation.
+The check looks for commands on PATH and desktop apps in `/Applications`; it
+does not verify fonts or detect apps installed elsewhere. Install additional fonts
+or apps used by your particular setup separately. Optional integrations need
+their tools installed before they can work.
+
+For a disposable config-only trial, pass `--home` to either command:
+
+```bash
+./bootstrap.sh check --home /tmp/dotfiles-home
+./bootstrap.sh install --home /tmp/dotfiles-home
+```
+
+An alternate home skips config sync because the sync scripts use the current
+user's `$HOME`; package installation, if requested, still affects the current
+machine. Its check also skips the current-user sync collision preview. The trial
+does not change `$HOME` or test launching applications.
+
+After installation, grant macOS Accessibility permissions to desktop tools as
+needed, sign into services separately, and integrate any preserved `.zshrc` or
+other existing files manually. SSH setup is opt-in through `setup.sh --with-ssh`
+after reviewing its configuration. The `--home` trial and automated tests do not
+replace a clean-account or live desktop check.
+
+### Recovery
+
+If a check or install reports a Stow conflict, inspect the named existing path;
+the installer will not adopt or overwrite it. Resolve it manually and rerun the
+check. If strict sync reports collisions, inspect the named links before changing
+them; it performs synchronization even when it returns a failure. A failure after
+config installation does not roll back the links already created.
+
+To remove Stow-managed config links deliberately, from the checkout run:
+
+```bash
+stow --delete --dir "$(pwd -P)" --target "$HOME/.config" .
+```
+
+This removes all matching managed links, including ones that existed before the
+most recent install; it is not a last-run undo. Review native `.zshrc` and
+`.hammerspoon` links separately and remove them only if they point to the managed
+configuration. Old repository-only links from previous broad installs are not
+removed automatically.
+
 ## Install
 
 Install GNU Stow first. Then invoke the installer from any working directory:
