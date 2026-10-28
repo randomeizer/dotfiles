@@ -102,7 +102,9 @@ path add /opt/homebrew/bin
 path add /run/current-system/sw/bin
 path add '~/.local/bin'
 path add ($env.HOME | path join 'go' 'bin')
-path add /opt/homebrew/opt/ruby/bin:$PATH
+if ('/opt/homebrew/opt/ruby/bin' | path exists) {
+    path add /opt/homebrew/opt/ruby/bin
+}
 
 # To load from a custom file you can use:
 # source ($nu.default-config-dir | path join 'custom.nu')
