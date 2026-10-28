@@ -172,7 +172,6 @@ enter_accept = true
 #   "go",
 #   "ip",
 #   "kubectl",
-#   "nix",
 #   "nmcli",
 #   "npm",
 #   "pecl",

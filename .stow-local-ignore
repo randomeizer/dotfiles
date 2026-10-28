@@ -1,6 +1,6 @@
 # Only these top-level configuration directories are deployed by `stow .`.
 # Add new config directories deliberately; everything else is repository-only.
-^/(?!(?:aerospace|agents|atuin|ghostty|hammerspoon|karabiner|nix|nix-darwin|nushell|nvim|powershell|scripts|sketchybar|skhd|ssh|starship|tmux|wezterm|zellij|zshrc)(?:/|$)).*
+^/(?!(?:aerospace|agents|atuin|ghostty|hammerspoon|karabiner|nushell|nvim|powershell|scripts|sketchybar|skhd|ssh|starship|tmux|wezterm|zellij|zshrc)(?:/|$)).*
 
 # A local ignore file replaces Stow's default list. Keep nested metadata and
 # generated Python files out of the installed configuration too.

@@ -11,7 +11,7 @@ import unittest
 REPO = Path(__file__).resolve().parents[1]
 CONFIG_DIRS = {
     "aerospace", "agents", "atuin", "ghostty", "hammerspoon", "karabiner",
-    "nix", "nix-darwin", "nushell", "nvim", "powershell", "scripts",
+    "nushell", "nvim", "powershell", "scripts",
     "sketchybar", "skhd", "ssh", "starship", "tmux", "wezterm", "zellij", "zshrc",
 }
 

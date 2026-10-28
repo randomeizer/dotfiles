@@ -99,7 +99,6 @@ use std "path add"
 # path add ($env.HOME | path join ".local" "bin")
 # $env.PATH = ($env.PATH | uniq)
 path add /opt/homebrew/bin
-path add /run/current-system/sw/bin
 path add '~/.local/bin'
 path add ($env.HOME | path join 'go' 'bin')
 if ('/opt/homebrew/opt/ruby/bin' | path exists) {
@@ -110,7 +109,6 @@ if ('/opt/homebrew/opt/ruby/bin' | path exists) {
 # source ($nu.default-config-dir | path join 'custom.nu')
 
 # zoxide init nushell | save -f ~/.zoxide.nu
-$env.NIX_CONF_DIR = '~/.config/nix'
 $env.CARAPACE_BRIDGES = 'zsh,fish,bash,inshellisense' # optional
 let _carapace_cache = ($home | path join '.cache' 'carapace')
 do { mkdir $_carapace_cache }
