@@ -5,31 +5,67 @@ if [[ $TERM_PROGRAM == "WarpTerminal" ]]; then
     return
 fi
 
-# Sync shell-specific setup (symlinks, etc.) outside ~/.config
-if [[ -x "$HOME/.config/scripts/config-sync.sh" ]]; then
-    "$HOME/.config/scripts/config-sync.sh"
-fi
-
-# Starship prompt
-if [[ -o interactive && -o zle ]]; then
-    if command -v starship >/dev/null 2>&1; then
-        eval "$(starship init zsh 2>/dev/null | sed '/^[[:space:]]*zle -N/d')"
-    fi
-fi
 export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
 
-# Completions
-source <(kubectl completion zsh) 2>/dev/null
-complete -C '/usr/local/bin/aws_completer' aws 2>/dev/null
+# Shell hooks and keybindings only make sense in an interactive editor.
+[[ -o interactive && -o zle ]] || return 0
+
+# Cache generated integrations. Refresh when the executable or its path changes;
+# write through a unique temporary file so concurrent shells never read partial output.
+_dotfiles_cached_init() {
+    setopt localoptions pipefail
+    local tool="$1" executable cache_dir cache_file cache_header header temp
+    (( $+commands[$tool] )) || return 0
+    executable="$commands[$tool]"
+    cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles-shell/zsh"
+    cache_file="$cache_dir/$tool.zsh"
+    header="# dotfiles executable: $executable"
+    cache_header=""
+    # Do not replace an unrelated file or a symlink, including a dangling one.
+    [[ ! -L "$cache_file" ]] || return 1
+    [[ ! -e "$cache_file" || -f "$cache_file" ]] || return 1
+    [[ ! -r "$cache_file" ]] || IFS= read -r cache_header < "$cache_file"
+    [[ ! -e "$cache_file" || "$cache_header" == '# dotfiles executable: '* ]] || return 1
+    if [[ ! -s "$cache_file" || "$cache_header" != "$header" || "$executable" -nt "$cache_file" ]]; then
+        mkdir -p -- "$cache_dir" || return 1
+        temp="$(mktemp "$cache_dir/.${tool}.XXXXXX")" || return 1
+        if {
+            print -r -- "$header"
+            case "$tool" in
+                starship) "$executable" init zsh | command sed '/^[[:space:]]*zle -N/d' ;;
+                kubectl) "$executable" completion zsh ;;
+                fzf) "$executable" --zsh ;;
+                direnv) "$executable" hook zsh ;;
+                zoxide|atuin) "$executable" init zsh ;;
+            esac
+        } > "$temp" 2>/dev/null && [[ "$(< "$temp")" != "$header" ]]; then
+            mv -f -- "$temp" "$cache_file" || { rm -f -- "$temp"; return 1; }
+        else
+            rm -f -- "$temp"
+            return 1
+        fi
+    fi
+    source "$cache_file"
+}
+
+_dotfiles_cached_init starship || true
+_dotfiles_cached_init kubectl || true
+if (( $+commands[aws_completer] )); then
+    complete -C "$commands[aws_completer]" aws 2>/dev/null
+fi
 
 # Auto-suggestions (if available) — only in interactive shells
 # Avoid running Homebrew commands in non-interactive or sandboxed shells
-if [[ $- == *i* ]] && [[ -x /opt/homebrew/bin/brew ]] && [[ -f $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
-    source "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+for autosuggestions in /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh /usr/local/share/zsh-autosuggestions/zsh-autosuggestions.zsh; do
+  if [[ -r "$autosuggestions" ]]; then
+    source "$autosuggestions"
     bindkey '^w' autosuggest-execute
     bindkey '^e' autosuggest-accept
     bindkey '^u' autosuggest-toggle
-fi
+    break
+  fi
+done
+unset autosuggestions
 
 # Emacs mode (default)
 bindkey -e
@@ -59,20 +95,11 @@ bindkey '^[F' select-word-forward
 # FZF integration
 # Set up fzf key bindings and fuzzy completion
 # Provides: CTRL-T (files/dirs), CTRL-R (history), ALT-C (cd to dir)
-if command -v fzf >/dev/null 2>&1; then
-    source <(fzf --zsh)
-fi
+_dotfiles_cached_init fzf || true
 
 # Directory-based environment loading (replaces oh-my-zsh autoenv)
-if command -v direnv >/dev/null 2>&1; then
-    eval "$(direnv hook zsh)"
-fi
+_dotfiles_cached_init direnv || true
 
 # Modern navigation tools
-if command -v zoxide >/dev/null 2>&1; then
-    eval "$(zoxide init zsh)"
-fi
-
-if command -v atuin >/dev/null 2>&1; then
-    eval "$(atuin init zsh)"
-fi
+_dotfiles_cached_init zoxide || true
+_dotfiles_cached_init atuin || true

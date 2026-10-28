@@ -153,8 +153,10 @@ the other recommendations from the setup review.
 
 ## Config sync
 
-Shell startup runs `~/.config/scripts/config-sync.sh` to link shared skills and
-the `azt` command. Links are removed only when they point to the expected managed
+`bootstrap.sh install` runs the repository's `scripts/config-sync.sh` to link shared
+skills and the `azt` command. Shell startup does not run sync; after changing
+shared skills or sync tasks, run the command below explicitly. Links are removed
+only when they point to the expected managed
 skill path and that path has disappeared. Existing files and unrelated links are
 preserved; collisions and failed tasks are reported without interrupting shell
 startup. The sync continues through all tasks after an error.
@@ -167,3 +169,19 @@ To synchronize and check for collisions or other failures explicitly, run:
 
 Strict mode returns a nonzero status if any task fails. Add `--debug` to show
 which tasks are run. Strict mode still performs synchronization.
+
+## Shell startup caches
+
+Interactive Zsh caches generated Starship, kubectl, fzf, direnv, zoxide and Atuin
+initialization under `${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles-shell/zsh`.
+Interactive PowerShell caches Starship initialization under the corresponding
+`dotfiles-shell/powershell` directory. Nushell keeps its generated Starship
+autoload under its data directory and Carapace output under `~/.cache/carapace`.
+Only installed tools are initialized; missing optional tools are skipped.
+
+Caches are generated on first interactive use and refreshed when the executable
+path or its modification time changes. Generation writes a temporary file before
+replacing the old cache, and a failed generation leaves the previous file intact.
+Delete the relevant generated cache to force a refresh. Nushell preserves unknown
+user-managed autoload files. Noninteractive shells do not run these integrations
+or sync the config. Starship still runs as needed to render the prompt itself.
