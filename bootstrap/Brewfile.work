@@ -2,3 +2,7 @@
 brew "kubernetes-cli"
 brew "azure-cli"
 brew "gh"
+brew "difftastic"
+brew "jless"
+brew "ast-grep"
+brew "just"

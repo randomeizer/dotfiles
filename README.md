@@ -39,7 +39,7 @@ deploys the config and runs sync. The groups are independent and repeatable:
 | Core | GNU Stow; installed whenever `--install-packages` is used. |
 | `shell` | Nushell, Starship, Carapace, eza, fzf, zoxide, Atuin, direnv, tmux, and JetBrains Mono fonts. |
 | `desktop` | AeroSpace, SketchyBar and Hammerspoon on macOS. |
-| `work` | kubectl, Azure CLI and GitHub CLI. |
+| `work` | kubectl, Azure CLI, GitHub CLI, Difftastic, jless, ast-grep, and just. |
 
 The manifests are in `bootstrap/Brewfile.*`. Homebrew is invoked with
 `--no-upgrade`; it may still need to update a dependency during installation.
@@ -47,6 +47,15 @@ The check looks for commands on PATH and desktop apps in `/Applications`; it
 does not verify fonts or detect apps installed elsewhere. Install additional fonts
 or apps used by your particular setup separately. Optional integrations need
 their tools installed before they can work.
+
+The work tools include Difftastic for structural Git diffs, `jless` for interactive
+JSON exploration, and `ast-grep` for syntax-aware code search. Enable Difftastic
+as the default for `git diff` with `git config --global diff.external difft`.
+This Git setting is maintained separately from the Stow-managed configuration.
+Zsh provides `gdifft` to select Difftastic explicitly and `gdiffplain` for plain
+patches (`git diff --no-ext-diff --no-textconv`). Shared agent instructions in
+`agents/AGENTS.md` describe when to use these tools; active agent instructions
+maintained separately need the same guidance.
 
 For a disposable config-only trial, pass `--home` to either command:
 
@@ -144,17 +153,33 @@ the link. Application dependencies must still be installed before using configs.
 
 ## Validate changes
 
-Run the repository checks before committing:
+With `just` installed (`brew install just`, or the `work` package group), run
+`just` to list project commands or `just --show <recipe>` to inspect one. Recipes
+delegate to the existing scripts and run from the repository root, including
+when invoked from a subdirectory.
+
+| Command | Behavior |
+| --- | --- |
+| `just check` | Run repository checks and require the behavioral tests. |
+| `just doctor` | Check dependencies and preview configuration conflicts. |
+| `just preview` | Preview configuration deployment without changing your home. |
+| `just preview --home /tmp/dotfiles-home` | Preview deployment into an alternate home. |
+| `just install` | Deploy configuration and run strict sync. |
+| `just install --install-packages --group work` | Install work packages, deploy configuration, and run strict sync. |
+| `just sync` | Synchronize shared skills and `azt`, reporting failures. |
+
+Use `just check` before committing. Direct scripts remain available when `just`
+is not installed, including during initial setup:
 
 ```bash
-bash scripts/check.sh
+bash scripts/check.sh --require-tests
 ```
 
 The command requires Git, Bash, Zsh, GNU Stow, Nushell, PowerShell, and Lua
 (`luac`). It checks tracked and unignored new shell, Lua, JSON and TOML files.
 The existing behavioral tests also run when Python 3 is available; otherwise the
-command reports that they were skipped. Pass `--require-tests` to fail if Python
-is missing. GitHub Actions uses that option until the tests are migrated away
+script reports that they were skipped unless `--require-tests` is passed.
+`just check` and GitHub Actions require those tests until they are migrated away
 from Python ([issue #23](https://github.com/randomeizer/dotfiles/issues/23)).
 Other missing tools and failed checks return a nonzero status.
 

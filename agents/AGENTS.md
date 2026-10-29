@@ -96,6 +96,11 @@ Work style: telegraph; noun-phrases ok; drop grammar; min tokens.
 
 Read `~/Development/agents/agent-scripts/tools.md` for the full tool catalog if it exists.
 
+### Code Search, JSON, and Diffs
+
+- Prefer `ast-grep` for syntax-aware code searches (call shapes, declarations, or migration patterns); use `rg` for literal text and filenames. Start with read-only matches, scope searches to relevant source paths, and review matches before rewriting.
+- Use `jless` for interactive JSON exploration when a terminal is available. For agent tool output, scripts, and CI, use bounded `jq` queries to return only relevant fields and counts; do not launch an interactive pager.
+- Difftastic is the default for `git diff`. For patches, parsing, or machine-readable output, explicitly use `git diff --no-ext-diff --no-textconv` (also supported by `git show`). Use `git -c diff.external=difft diff` to select structural output explicitly for human review.
 
 ### committer
 
