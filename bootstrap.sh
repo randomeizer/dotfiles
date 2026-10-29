@@ -102,7 +102,7 @@ if [[ "$mode" == check ]]; then
   app_status AeroSpace /Applications/AeroSpace.app "$desktop_group"
   app_status Hammerspoon /Applications/Hammerspoon.app "$desktop_group"
   printf 'Work tools:\n'
-  for tool in kubectl az gh; do tool_status "$tool" "$work_group"; done
+  for tool in kubectl az gh difft jless ast-grep just; do tool_status "$tool" "$work_group"; done
   if command -v stow >/dev/null 2>&1; then
     printf 'Configuration preview:\n'
     if preview="$(bash "$repo_dir/setup.sh" --dry-run --home "$install_home" 2>&1)"; then
