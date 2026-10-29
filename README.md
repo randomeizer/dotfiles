@@ -124,6 +124,10 @@ that location to resolve correctly when used on a real machine.
 | Hammerspoon | `<target>/hammerspoon` | Linked from `<home>/.hammerspoon` if absent; no macOS preference changes. |
 | SSH | `<target>/ssh/ssh-config` | Reference only by default. `--with-ssh` links `<home>/.ssh/config` if absent. Review the SSH settings before opting in. |
 
+When the repository SSH config is active, put private host entries and any
+per-host compatibility exceptions in `~/.ssh/config.local`. That optional file
+is read before the repository’s general defaults.
+
 Existing native files, directories, and unrelated symlinks (including dangling
 ones) are preserved and reported. If a preserved native path needs to load this
 configuration, integrate it manually after reviewing your existing contents.
