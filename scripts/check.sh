@@ -42,6 +42,9 @@ while IFS= read -r -d '' file; do
     failures=$((failures + 1))
   fi
 done < "$file_list"
+if ! bash tests/check_presenter_skills.sh; then
+  failures=$((failures + 1))
+fi
 if command -v python3 >/dev/null 2>&1; then
   printf 'Running behavioral tests (Python)\n'
   if ! PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_*.py'; then
