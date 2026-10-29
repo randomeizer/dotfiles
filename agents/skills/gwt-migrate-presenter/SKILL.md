@@ -267,3 +267,4 @@ Use `assets/example/` for a minimal end-state skeleton:
 - `ExampleView.java`
 - `ExampleViewImpl.java`
 - `ExampleModule.java`
+- `package-info.java`

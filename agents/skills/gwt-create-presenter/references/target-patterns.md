@@ -2,18 +2,20 @@
 
 Use these files as the greenfield reference shape when creating a new presenter/view pair:
 
-- `vims-app/src/main/java/au/gov/qld/des/vims/client/auth/LoginPresenter.java`
-- `vims-app/src/main/java/au/gov/qld/des/vims/client/auth/LoginView.java`
-- `vims-app/src/main/java/au/gov/qld/des/vims/client/auth/LoginViewImpl.java`
-- `vims-app/src/main/java/au/gov/qld/des/vims/client/auth/AuthModule.java`
-- `vims-app/src/main/java/au/gov/qld/des/vims/client/HomePresenter.java`
-- `vims-app/src/main/java/au/gov/qld/des/vims/client/HomeView.java`
-- `vims-app/src/main/java/au/gov/qld/des/vims/client/HomeViewImpl.java`
-- `vims-app/src/main/java/au/gov/qld/des/vims/client/HomeModule.java`
+- `src/main/java/au/gov/qld/des/vims/client/auth/LoginPresenter.java`
+- `src/main/java/au/gov/qld/des/vims/client/auth/LoginView.java`
+- `src/main/java/au/gov/qld/des/vims/client/auth/LoginViewImpl.java`
+- `src/main/java/au/gov/qld/des/vims/client/auth/AuthModule.java`
+- `src/main/java/au/gov/qld/des/vims/client/HomePresenter.java`
+- `src/main/java/au/gov/qld/des/vims/client/HomeView.java`
+- `src/main/java/au/gov/qld/des/vims/client/HomeViewImpl.java`
+- `src/main/java/au/gov/qld/des/vims/client/HomeModule.java`
 
 ## What To Notice
 
 - The presenter depends on services plus a view interface, not widget internals.
+- Prefer a plain injected final presenter when no framework contract is consumed. Implement
+  `Presenter` or use a thin base only when actual callers or required behaviour justify it.
 - The main sequence is visible from the concrete presenter and view implementation.
 - The view interface is small and intent-based.
 - The view implementation owns layout, widgets, and raw UI event translation.

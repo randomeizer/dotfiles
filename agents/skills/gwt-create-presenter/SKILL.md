@@ -1,13 +1,15 @@
 ---
 name: gwt-create-presenter
-description: Create new VIMS GWT presenter/view pairs using BasePresenter, interface-first views, ViewImpl classes, Dagger module bindings, and optional event-manager/provider wiring. Use when Codex needs to add a new client-side presenter/view in VIMS, shape a presenter-facing view API that hides GWT and GXT internals, or scaffold a new presenter/view/module set that follows the Login and Home patterns from the start.
+description: Create new VIMS GWT presenter/view pairs using plain or framework-backed injected presenters, interface-first views, ViewImpl classes, Dagger module bindings, and optional event-manager/provider wiring. Use when Codex needs to add a new client-side presenter/view in VIMS, shape a presenter-facing view API that hides GWT and GXT internals, or scaffold a new presenter/view/module set that follows the Login and Home patterns from the start.
 ---
 
 # GWT Presenter/View Creation (VIMS)
 
 Create new presenter/view pairs in `au.gov.qld.des.vims.client.*` using the same interface-first,
 composition-first shape seen in `Login` and `Home`:
-- thin framework host only when it stays non-prescriptive, for example `BasePresenter<YourView>`
+- plain injected final presenter when no framework presenter contract is consumed
+- direct `Presenter` implementation only when callers actually use that contract
+- thin framework host such as `BasePresenter<YourView>` only when it supplies required behaviour
 - public `YourView` interface
 - concrete `YourViewImpl`
 - Dagger module binding for the interface
@@ -32,7 +34,11 @@ Treat these as defaults:
   smallest possible `@Deprecated` `AppEnvironment` accessor that forwards to `AppComponent`.
 - Prefer injected helpers or composable dependencies for reusable behaviour such as masking, report
   orchestration, validation helpers, loader wiring, or event registration patterns.
-- Create exhaustive presenter unit tests in TestNG as part of the initial implementation.
+- Follow the repository JSpecify policy: explicitly mark new client packages `@NullMarked`, use
+  `org.jspecify.annotations.Nullable` for genuinely nullable declarations, and omit redundant
+  `@NonNull` inside null-marked scopes. Do not change an existing `@NullUnmarked` package without
+  auditing the whole package.
+- Create presenter unit tests in TestNG that cover the implemented behaviours.
 
 ## Composite Presenters and Child Placement
 
@@ -72,13 +78,15 @@ When creating a presenter that will live inside a parent tab, panel, or wizard:
   of inheritance.
 
 4. Create the presenter
-- Extend `BasePresenter<YourView>` only when it remains a thin framework host and the feature flow
-  still reads clearly from `YourPresenter`.
-- Use `@Inject` or `@AssistedInject` plus `@Nonnull` constructor parameters.
+- Prefer a plain final class when no caller consumes `Presenter` and no framework lifecycle is
+  required. Implement `Presenter` directly only when callers use that contract. Use
+  `BasePresenter<YourView>` only when it supplies required framework behaviour and remains thin.
+- Use `@Inject` or `@AssistedInject` constructor injection; apply the JSpecify policy above.
 - Store dependencies as `final` fields.
 - Wire view callbacks in `initUI`.
 - Keep dispatch, business rules, event-manager interactions, and state changes in the presenter.
-- Implement `getContext()` and `getEventManager()` explicitly.
+- Add `getView()`, `getContext()`, or `getEventManager()` only when the selected contract or an
+  actual caller needs them, not by convention.
 - Keep sequencing and orchestration in the concrete presenter.
 - Do not instantiate `YourViewImpl` or other dependencies inside the presenter constructor.
 - If the presenter needs runtime arguments such as `parent`, `context`, or `eventManager`, define an
@@ -87,13 +95,13 @@ When creating a presenter that will live inside a parent tab, panel, or wizard:
   generic framework glue.
 
 5. Create exhaustive presenter unit tests
-- Create `YourPresenterTest` under `vims-app/src/test/java/...` beside the feature package.
+- Create `YourPresenterTest` under `src/test/java/...` beside the feature package.
 - Use current VIMS test standards: TestNG, `EasyMockSupport`, `@Test(groups = "unit")`, and `@BeforeMethod` calling `resetAll()`.
 - Mock the view interface and presenter dependencies. Do not depend on concrete `YourViewImpl` internals in the presenter tests.
 - Cover constructor and `initUI` wiring, registered view callbacks, public presenter entry points, event-manager registration, dispatch success and failure paths, validation branches, and null or edge cases.
 - Capture lambdas, callbacks, or handlers registered on the view and invoke them directly to prove presenter behaviour.
 - Prefer one focused test per behaviour, with helper methods for repeated constructor expectations when that keeps the suite readable.
-- Follow `vims-app/src/test/java/au/gov/qld/des/vims/client/auth/LoginPresenterTest.java` and `vims-app/src/test/java/au/gov/qld/des/vims/client/HomePresenterTest.java`.
+- Follow `src/test/java/au/gov/qld/des/vims/client/auth/LoginPresenterTest.java` and `src/test/java/au/gov/qld/des/vims/client/HomePresenterTest.java`.
 
 6. Add module and wiring
 - Create `YourFeatureModule` with `provideYourView(...)` returning `YourViewImpl`.
@@ -117,7 +125,9 @@ When creating a presenter that will live inside a parent tab, panel, or wizard:
 - Confirm reusable workflow, if any, was placed in a helper or dependency rather than a richer
   inherited base.
 - Confirm the presenter test suite is exhaustive for the implemented behaviours and follows current TestNG patterns.
-- Run the focused presenter test class when practical.
+- Run the focused presenter test class when practical. Use Maven with Java 22 and `-DforkCount=0`;
+  verify Maven’s VM with `mvn -version`. After Dagger or assisted-factory changes, use
+  `mvn -DskipTests compile gwt:compile` so annotation processing precedes GWT compilation.
 
 ## API Design Rules
 
@@ -163,11 +173,12 @@ View responsibilities:
 
 Open these only when needed:
 - `references/target-patterns.md`
-- `vims-app/src/test/java/au/gov/qld/des/vims/client/auth/LoginPresenterTest.java`
-- `vims-app/src/test/java/au/gov/qld/des/vims/client/HomePresenterTest.java`
+- `src/test/java/au/gov/qld/des/vims/client/auth/LoginPresenterTest.java`
+- `src/test/java/au/gov/qld/des/vims/client/HomePresenterTest.java`
 
 Use `assets/example/` for a minimal skeleton:
 - `ExamplePresenter.java`
 - `ExampleView.java`
 - `ExampleViewImpl.java`
 - `ExampleModule.java`
+- `package-info.java`

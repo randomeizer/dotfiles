@@ -199,10 +199,14 @@ class NushellStartupTests(unittest.TestCase):
                     break
             self.fail("interactive Nu did not load the cached prompt: " + output[-3000:].decode(errors="replace"))
         finally:
+            os.close(master)
             if process.poll() is None:
                 process.terminate()
-                process.wait(timeout=2)
-            os.close(master)
+                try:
+                    process.wait(timeout=2)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    process.wait(timeout=5)
 
     def test_noninteractive_does_not_generate_and_missing_tools_are_safe(self):
         self.fake_tool("starship")

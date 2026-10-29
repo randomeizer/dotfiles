@@ -1,21 +1,14 @@
 package au.gov.qld.des.vims.client.example;
 
-import au.gov.qld.des.vims.client.common.UIConfig;
-import au.gov.qld.des.vims.client.support.BasePresenter;
-import au.gov.qld.des.vims.client.support.EventManager;
-import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
-/**
- * Example presenter skeleton.
- */
-public class ExamplePresenter extends BasePresenter<ExampleView> {
+/** Example presenter with no framework presenter contract. */
+public final class ExamplePresenter {
 
   private final ExampleView view;
 
   @Inject
-  public ExamplePresenter(@Nonnull ExampleView view) {
-    super(new UIConfig());
+  public ExamplePresenter(ExampleView view) {
     this.view = view;
     initUI();
   }
@@ -26,20 +19,5 @@ public class ExamplePresenter extends BasePresenter<ExampleView> {
 
   private void onPrimaryAction() {
     view.showStatus("Hello from ExamplePresenter");
-  }
-
-  @Override
-  public String getContext() {
-    return UIConfig.KEY_GLOBAL_CONTEXT;
-  }
-
-  @Override
-  public EventManager getEventManager() {
-    return null;
-  }
-
-  @Override
-  public ExampleView getView() {
-    return view;
   }
 }
