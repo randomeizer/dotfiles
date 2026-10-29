@@ -1,13 +1,9 @@
+# Personal host entries and exceptions should precede the global defaults.
+Include ~/.ssh/config.local
+
 Host *
   SendEnv LANG LC_*
-  MACs hmac-md5,hmac-sha1
   ForwardX11 no
-  ForwardAgent yes
-  AddressFamily inet
+  ForwardAgent no
   ServerAliveInterval 15
   ConnectTimeout 20
-
-Host bastion
-    User ec2-user
-    Hostname bastion.domain.com
-    IdentityFile ~/.ssh/id_rsa
